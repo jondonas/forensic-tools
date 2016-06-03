@@ -1,0 +1,492 @@
+doctype html
+html
+  head
+    title Paladion Tools
+    |     
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    // Fonts
+    link(href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400', rel='stylesheet', type='text/css')
+    |     
+    link(href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900', rel='stylesheet', type='text/css')
+    // CSS Libs
+    link(rel='stylesheet', type='text/css', href='template/static/lib/css/bootstrap.min.css')
+    |     
+    link(rel='stylesheet', type='text/css', href='template/static/lib/css/font-awesome.min.css')
+    |     
+    link(rel='stylesheet', type='text/css', href='template/static/lib/css/animate.min.css')
+    |     
+    link(rel='stylesheet', type='text/css', href='template/static/lib/css/bootstrap-switch.min.css')
+    |     
+    link(rel='stylesheet', type='text/css', href='template/static/lib/css/checkbox3.min.css')
+    |     
+    link(rel='stylesheet', type='text/css', href='template/static/lib/css/jquery.dataTables.min.css')
+    |     
+    link(rel='stylesheet', type='text/css', href='template/static/lib/css/dataTables.bootstrap.css')
+    |     
+    link(rel='stylesheet', type='text/css', href='template/static/lib/css/select2.min.css')
+    // CSS App
+    link(rel='stylesheet', type='text/css', href='template/static/css/style.css')
+    |     
+    link(rel='stylesheet', type='text/css', href='template/static/css/themes/flat-blue.css')
+  body.flat-blue
+    .app-container
+      .row.content-container
+        nav.navbar.navbar-default.navbar-fixed-top.navbar-top
+          .container-fluid
+            .navbar-header
+              button.navbar-expand-toggle(type='button')
+                i.fa.fa-bars.icon
+              |                         
+              ol.breadcrumb.navbar-breadcrumb
+                li.active Forensic Cases
+              |                         
+              button.navbar-right-expand-toggle.pull-right.visible-xs(type='button')
+                i.fa.fa-th.icon
+            |                     
+            ul.nav.navbar-nav.navbar-right
+              button.navbar-right-expand-toggle.pull-right.visible-xs(type='button')
+                i.fa.fa-times.icon
+            //-
+              |                         
+              li.dropdown
+                a.dropdown-toggle(href='#', data-toggle='dropdown', role='button', aria-expanded='false')
+                  i.fa.fa-comments-o
+                |                             
+                ul.dropdown-menu.animated.fadeInDown
+                  li.title
+                    | Notification 
+                    span.badge.pull-right 0
+                  |                                 
+                  li.message
+                    | No new notification
+              |                         
+              li.dropdown.danger
+                a.dropdown-toggle(href='#', data-toggle='dropdown', role='button', aria-expanded='false')
+                  i.fa.fa-star-half-o
+                  |  4
+                |     
+                ul.dropdown-menu.danger.animated.fadeInDown
+                  li.title
+                    | Notification 
+                    span.badge.pull-right 4
+                  |                                 
+                  li
+                    ul.list-group.notifications
+                      a(href='#')
+                        li.list-group-item
+                          span.badge 1
+                          |  
+                          i.fa.fa-exclamation-circle.icon
+                          |  new registration
+                      |                                         
+                      a(href='#')
+                        li.list-group-item
+                          span.badge.success 1
+                          |  
+                          i.fa.fa-check.icon
+                          |  new orders
+                      |                                         
+                      a(href='#')
+                        li.list-group-item
+                          span.badge.danger 2
+                          |  
+                          i.fa.fa-comments.icon
+                          |  customers messages
+                      |                                         
+                      a(href='#')
+                        li.list-group-item.message
+                          | view all
+              |                         
+              li.dropdown.profile
+                a.dropdown-toggle(href='#', data-toggle='dropdown', role='button', aria-expanded='false')
+                  | Emily Hart 
+                  span.caret
+                |                             
+                ul.dropdown-menu.animated.fadeInDown
+                  li.profile-img
+                    img.profile-img(src='../img/profile/picjumbo.com_HNCK4153_resize.jpg')
+                  |                                 
+                  li
+                    .profile-info
+                      h4.username Emily Hart
+                      |                                         
+                      p emily_hart@email.com
+                      |                                         
+                      .btn-group.margin-bottom-2x(role='group')
+                        button.btn.btn-default(type='button')
+                          i.fa.fa-user
+                          |  Profile
+                        |                                             
+                        button.btn.btn-default(type='button')
+                          i.fa.fa-sign-out
+                          |  Logout
+        |             
+        .side-menu.sidebar-inverse
+          nav.navbar.navbar-default(role='navigation')
+            .side-menu-container
+              .navbar-header
+                a.navbar-brand(href='#')
+                  .icon.fa.fa-paper-plane
+                  |                                 
+                  .title Paladion Tools
+                |                             
+                button.navbar-expand-toggle.pull-right.visible-xs(type='button')
+                  i.fa.fa-times.icon
+              |                         
+              ul.nav.navbar-nav
+                li
+                  a(href='/')
+                    span.icon.fa.fa-tachometer
+                    span.title IP Checker
+                |                             
+                li.active
+                  a(href='/cases')
+                    span.icon.fa.fa-desktop
+                    span.title Forensic Cases
+                //-
+                  // Dropdown level 1
+                  #dropdown-element.panel-collapse.collapse
+                    .panel-body
+                      ul.nav.navbar-nav
+                        li
+                          a(href='ui-kits/theming.html') Theming
+                        |                                             
+                        li
+                          a(href='ui-kits/grid.html') Grid
+                        |                                             
+                        li
+                          a(href='ui-kits/button.html') Buttons
+                        |                                             
+                        li
+                          a(href='ui-kits/card.html') Cards
+                        |                                             
+                        li
+                          a(href='ui-kits/list.html') Lists
+                        |                                             
+                        li
+                          a(href='ui-kits/modal.html') Modals
+                        |                                             
+                        li
+                          a(href='ui-kits/alert.html') Alerts &amp; Toasts
+                        |                                             
+                        li
+                          a(href='ui-kits/panel.html') Panels
+                        |                                             
+                        li
+                          a(href='ui-kits/loader.html') Loaders
+                        |                                             
+                        li
+                          a(href='ui-kits/step.html') Tabs &amp; Steps
+                        |                                             
+                        li
+                          a(href='ui-kits/other.html') Other
+              //-
+                |                             
+                li.panel.panel-default.dropdown
+                  a(data-toggle='collapse', href='#dropdown-table')
+                    span.icon.fa.fa-table
+                    span.title Table
+                  // Dropdown level 1
+                  #dropdown-table.panel-collapse.collapse
+                    .panel-body
+                      ul.nav.navbar-nav
+                        li
+                          a(href='table/table.html') Table
+                        |                                             
+                        li
+                          a(href='table/datatable.html') Datatable
+                |                             
+                li.panel.panel-default.dropdown
+                  a(data-toggle='collapse', href='#dropdown-form')
+                    span.icon.fa.fa-file-text-o
+                    span.title Form
+                  // Dropdown level 1
+                  #dropdown-form.panel-collapse.collapse
+                    .panel-body
+                      ul.nav.navbar-nav
+                        li
+                          a(href='form/ui-kits.html') Form UI Kits
+                // Dropdown
+                li.panel.panel-default.dropdown
+                  a(data-toggle='collapse', href='#component-example')
+                    span.icon.fa.fa-cubes
+                    span.title Components
+                  // Dropdown level 1
+                  #component-example.panel-collapse.collapse
+                    .panel-body
+                      ul.nav.navbar-nav
+                        li
+                          a(href='components/pricing-table.html') Pricing Table
+                        |                                             
+                        li
+                          a(href='components/chartjs.html') Chart.JS
+                // Dropdown
+                li.panel.panel-default.dropdown
+                  a(data-toggle='collapse', href='#dropdown-example')
+                    span.icon.fa.fa-slack
+                    span.title Page Example
+                  // Dropdown level 1
+                  #dropdown-example.panel-collapse.collapse
+                    .panel-body
+                      ul.nav.navbar-nav
+                        li
+                          a(href='pages/login.html') Login
+                        |                                             
+                        li
+                          a(href='pages/index.html') Landing Page
+                // Dropdown
+                li.panel.panel-default.dropdown
+                  a(data-toggle='collapse', href='#dropdown-icon')
+                    span.icon.fa.fa-archive
+                    span.title Icons
+                  // Dropdown level 1
+                  #dropdown-icon.panel-collapse.collapse
+                    .panel-body
+                      ul.nav.navbar-nav
+                        li
+                          a(href='icons/glyphicons.html') Glyphicons
+                        |                                             
+                        li
+                          a(href='icons/font-awesome.html') Font Awesomes
+                |                             
+                li
+                  a(href='license.html')
+                    span.icon.fa.fa-thumbs-o-up
+                    span.title License
+            // /.navbar-collapse
+        // Main Content
+        .container-fluid
+          .side-body.padding-top
+            div(style="height: 860px;")
+              iframe(width="100%" height="100%" frameborder="0" src="/forensic-cases")
+          //-
+            .row
+              .col-lg-3.col-md-6.col-sm-6.col-xs-12
+                a(href='#')
+                  .card.red.summary-inline
+                    .card-body
+                      i.icon.fa.fa-inbox.fa-4x
+                      |                                         
+                      .content
+                        .title 50
+                        |                                             
+                        .sub-title New Mails
+                      |                                         
+                      .clear-both
+              |                         
+              .col-lg-3.col-md-6.col-sm-6.col-xs-12
+                a(href='#')
+                  .card.yellow.summary-inline
+                    .card-body
+                      i.icon.fa.fa-comments.fa-4x
+                      |                                         
+                      .content
+                        .title 23
+                        |                                             
+                        .sub-title New Message
+                      |                                         
+                      .clear-both
+              |                         
+              .col-lg-3.col-md-6.col-sm-6.col-xs-12
+                a(href='#')
+                  .card.green.summary-inline
+                    .card-body
+                      i.icon.fa.fa-tags.fa-4x
+                      |                                         
+                      .content
+                        .title 280
+                        |                                             
+                        .sub-title Product View
+                      |                                         
+                      .clear-both
+              |                         
+              .col-lg-3.col-md-6.col-sm-6.col-xs-12
+                a(href='#')
+                  .card.blue.summary-inline
+                    .card-body
+                      i.icon.fa.fa-share-alt.fa-4x
+                      |                                         
+                      .content
+                        .title 16
+                        |                                             
+                        .sub-title Share
+                      |                                         
+                      .clear-both
+            |                     
+            .row.no-margin-bottom
+              .col-sm-6.col-xs-12
+                .row
+                  .col-xs-12
+                    .card.primary
+                      .card-jumbotron.no-padding
+                        canvas#jumbotron-line-chart.chart.no-padding
+                      |                                         
+                      .card-body.half-padding
+                        h4.float-left.no-margin.font-weight-300 Profits
+                        |                                             
+                        h2.float-right.no-margin.font-weight-300 $3200
+                        |                                             
+                        .clear-both
+                |                             
+                .row
+                  .col-md-6.col-sm-12
+                    .thumbnail.no-margin-bottom
+                      img.img-responsive(src='../img/thumbnails/picjumbo.com_IMG_4566.jpg')
+                      |                                         
+                      .caption
+                        h3#thumbnail-label
+                          | Thumbnail label
+                          a.anchorjs-link(href='#thumbnail-label')
+                            span.anchorjs-icon
+                        |                                             
+                        p
+                          | Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.
+                        |                                             
+                        p
+                          a.btn.btn-primary(href='#', role='button') Button
+                          |  
+                          a.btn.btn-default(href='#', role='button') Button
+                  |                                 
+                  .col-md-6.col-sm-12
+                    .thumbnail.no-margin-bottom
+                      img.img-responsive(src='../img/thumbnails/picjumbo.com_IMG_3241.jpg')
+                      |                                         
+                      .caption
+                        h3#thumbnail-label
+                          | Thumbnail label
+                          a.anchorjs-link(href='#thumbnail-label')
+                            span.anchorjs-icon
+                        |                                             
+                        p
+                          | Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.
+                        |                                             
+                        p
+                          a.btn.btn-success(href='#', role='button') Button
+                          |  
+                          a.btn.btn-default(href='#', role='button') Button
+              |                         
+              .col-sm-6.col-xs-12
+                .row
+                  .col-md-6.col-sm-12
+                    .card.primary
+                      .card-jumbotron.no-padding
+                        canvas#jumbotron-bar-chart.chart.no-padding
+                      |                                         
+                      .card-body.half-padding
+                        h4.float-left.no-margin.font-weight-300 Orders
+                        |                                             
+                        .clear-both
+                  |                                 
+                  .col-md-6.col-sm-12
+                    .card.primary
+                      .card-jumbotron.no-padding
+                        canvas#jumbotron-line-2-chart.chart.no-padding
+                      |                                         
+                      .card-body.half-padding
+                        h4.float-left.no-margin.font-weight-300 Pages view
+                        |                                             
+                        .clear-both
+                |                             
+                .card.card-success
+                  .card-header
+                    .card-title
+                      .title
+                        i.fa.fa-comments-o
+                        |  Last Message
+                    |                                     
+                    .clear-both
+                  |                                 
+                  .card-body.no-padding
+                    ul.message-list
+                      a(href='#')
+                        li
+                          img.profile-img.pull-left(src='../img/profile/profile-1.jpg')
+                          |                                                 
+                          .message-block
+                            div
+                              span.username Tui2Tone
+                              |  
+                              span.message-datetime 12 min ago
+                            |                                                     
+                            .message
+                              | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare dolor, quis ullamcorper ligula sodales.
+                      |                                         
+                      a(href='#')
+                        li
+                          img.profile-img.pull-left(src='../img/profile/profile-1.jpg')
+                          |                                                 
+                          .message-block
+                            div
+                              span.username Tui2Tone
+                              |  
+                              span.message-datetime 15 min ago
+                            |                                                     
+                            .message
+                              | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare dolor, quis ullamcorper ligula sodales.
+                      |                                         
+                      a(href='#')
+                        li
+                          img.profile-img.pull-left(src='../img/profile/profile-1.jpg')
+                          |                                                 
+                          .message-block
+                            div
+                              span.username Tui2Tone
+                              |  
+                              span.message-datetime 2 hour ago
+                            |                                                     
+                            .message
+                              | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare dolor, quis ullamcorper ligula sodales.
+                      |                                         
+                      a(href='#')
+                        li
+                          img.profile-img.pull-left(src='../img/profile/profile-1.jpg')
+                          |                                                 
+                          .message-block
+                            div
+                              span.username Tui2Tone
+                              |  
+                              span.message-datetime 1 day ago
+                            |                                                     
+                            .message
+                              | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare dolor, quis ullamcorper ligula sodales.
+                      |                                         
+                      a#message-load-more(href='#')
+                        li.text-center.load-more
+                          i.fa.fa-refresh
+                          |  load more..
+      |         
+      footer.app-footer
+        .wrapper
+          span.pull-right
+            | 1.0 
+            a(href='#')
+              i.fa.fa-long-arrow-up
+          |  Copyright &copy; 2016 Paladion Inc
+      |         
+      div
+        // Javascript Libs
+        script(type='text/javascript', src='template/static/lib/js/jquery.min.js')
+        |             
+        script(type='text/javascript', src='template/static/lib/js/bootstrap.min.js')
+        |             
+        script(type='text/javascript', src='template/static/lib/js/Chart.min.js')
+        |             
+        script(type='text/javascript', src='template/static/lib/js/bootstrap-switch.min.js')
+        |             
+        script(type='text/javascript', src='template/static/lib/js/jquery.matchHeight-min.js')
+        |             
+        script(type='text/javascript', src='template/static/lib/js/jquery.dataTables.min.js')
+        |             
+        script(type='text/javascript', src='template/static/lib/js/dataTables.bootstrap.min.js')
+        |             
+        script(type='text/javascript', src='template/static/lib/js/select2.full.min.js')
+        |             
+        script(type='text/javascript', src='template/static/lib/js/ace/ace.js')
+        |             
+        script(type='text/javascript', src='template/static/lib/js/ace/mode-html.js')
+        |             
+        script(type='text/javascript', src='template/static/lib/js/ace/theme-github.js')
+        // Javascript
+        script(type='text/javascript', src='template/static/js/app.js')
+        |             
+        script(type='text/javascript', src='template/static/js/index.js')

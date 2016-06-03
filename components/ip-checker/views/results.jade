@@ -1,0 +1,59 @@
+doctype
+html
+  head
+    link(rel="stylesheet", href="components/ip-checker/static/json.human.css")
+    link(rel="stylesheet", href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css")
+    link(rel='stylesheet', type='text/css', href='components/ip-checker/static/results.css')
+    script(src="components/ip-checker/static/json.human.js")
+
+    //style
+      //include components/ip-checker/static/results.css
+    script(src="http://code.jquery.com/jquery-1.11.3.min.js")
+    script(src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js")
+    script(src="http://maps.googleapis.com/maps/api/js")
+    script.
+      function initialize() {
+        var mapProp = {
+          center:new google.maps.LatLng(#{loc}),
+          zoom:7,
+          mapTypeId:google.maps.MapTypeId.ROADMAP
+        };
+        var map=new google.maps.Map(document.getElementById("googleMap"),mapProp);
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+  body
+    h1(style="margin:0;")
+      span(class="grey")
+        | Info for:&nbsp;
+      span(class="red")
+        | #{ip}
+    br
+    div(id="googleMap" style="border-radius: 15px; width:500px; height:200px; margin: auto;")
+    br
+    div(style="width: 470px; margin: 0 auto; font-size: 130%;")
+      hr
+      | !{vir_insert}
+      hr
+    div(style="font-size: 130%; text-align: center;")
+      | !{reg_insert}
+    div(style="width: 470px; margin: 0 auto; font-size: 130%;")
+      hr
+      p(style="font-size: 80%;")
+        b Elasticsearch Query Time:&nbsp;
+        | #{time}ms
+    div(data-role="collapsible")
+      h1 VirusTotal Details
+      #vir_output
+    div(data-role="collapsible")
+      h1 Registrar Details
+      #reg_output
+    script.
+      function draw(json, output) {
+        var input = json;
+        var node = JsonHuman.format(input);
+        output = document.getElementById(output);
+        output.innerHTML = "";
+        output.appendChild(node);
+      }
+      draw(!{JSON.stringify(vir_json)}, "vir_output");
+      draw(!{JSON.stringify(reg_json)}, "reg_output");

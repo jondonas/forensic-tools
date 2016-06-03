@@ -1,0 +1,33 @@
+Command to create current index:
+
+curl -XPOST 'localhost:9200/cti' -d '
+{"mappings":{"ipaddr":{"properties":{"address":{"type":"string"},"as_owner":{"type":"string"},"asn":{"type":"string"},"cidr":{"type":"string"},"city":{"type":"string"},"country":{"type":"string"},"countrycode":{"type":"string"},"data":{"type":"string"},"datetime":{"type":"date", "format": "MM/dd/yyyy HH:mm:ss"},"detected_communicating_samples":{"properties":{"date":{"type":"string"},"positives":{"type":"long"},"sha256":{"type":"string"},"total":{"type":"long"}}},"detected_downloaded_samples":{"properties":{"date":{"type":"string"},"positives":{"type":"long"},"sha256":{"type":"string"},"total":{"type":"long"}}},"detected_referrer_samples":{"properties":{"positives":{"type":"long"},"sha256":{"type":"string"},"total":{"type":"long"}}},"detected_urls":{"properties":{"positives":{"type":"long"},"scan_date":{"type":"string"},"total":{"type":"long"},"url":{"type":"string"}}},"fqdn":{"type":"string"},"ipaddr":{"type":"ip"},"malicious":{"type":"string"},"netname":{"type":"string"},"netrange":{"type":"string"},"network":{"type":"string"},"organization":{"type":"string"},"postalcode":{"type":"string"},"province":{"type":"string"},"provincecode":{"type":"string"},"registrar":{"type":"string"},"resolutions":{"properties":{"hostname":{"type":"string"},"last_resolved":{"type":"string"}}},"response_code":{"type":"long"},"source":{"type":"string"},"streetaddress":{"type":"string"},"undetected_communicating_samples":{"properties":{"date":{"type":"string"},"positives":{"type":"long"},"sha256":{"type":"string"},"total":{"type":"long"}}},"undetected_downloaded_samples":{"properties":{"date":{"type":"string"},"positives":{"type":"long"},"sha256":{"type":"string"},"total":{"type":"long"}}},"undetected_referrer_samples":{"properties":{"positives":{"type":"long"},"sha256":{"type":"string"},"total":{"type":"long"}}},"verbose_msg":{"type":"string"}}}}}'
+
+
+Check if document exists with certain field value:
+
+curl -XPOST 'http://localhost:9200/cti/ipaddr/_search/exists' -d '
+{
+  "query": {
+    "match": {
+    "ipaddr": "67.192.138.248"}
+  }
+}'
+
+
+Return only most recent document:
+
+curl -XPOST 'localhost:9200/cti/_search?pretty' -d '
+{
+  "query": {
+    "match": {
+    "ipaddr": "67.192.138.248"}
+  },
+  "size": 1,
+  "sort":
+    {
+      "datetime": {
+        "order": "desc"
+      }
+    }
+}'

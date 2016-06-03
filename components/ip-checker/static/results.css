@@ -1,0 +1,20 @@
+h1 {
+    text-align: center;
+    text-transform: uppercase;
+    color: #CC0000;
+    font-family: arial black;
+}
+
+img {
+     margin: 5px 0px 0px 0px;
+     float:left;
+     user-drag: none;
+     user-select: none;
+     -moz-user-select: none;
+     -webkit-user-drag: none;
+     -webkit-user-select: none;
+     -ms-user-select: none;
+}
+
+.red { color: #CC0000; }
+.grey { color: #7E7E7E; }

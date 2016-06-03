@@ -1,0 +1,15 @@
+apt-get install npm
+apt-get install nodejs
+npm install express
+
+In the project folder:
+  npm init
+
+npm install express --save
+npm install body-parser --save
+npm install jade --save
+npm install exec-sync --save
+npm-install underscore --save
+
+pip install requests
+

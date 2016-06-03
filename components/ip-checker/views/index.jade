@@ -1,0 +1,39 @@
+doctype
+html
+  head
+    link(rel='stylesheet', type='text/css', href='components/ip-checker/static/index.css')
+  body
+    div(style="padding-bottom:60px;")
+      h1(style="font-size: 230%;")
+        //span(class="red")
+          //| Paladion 
+        span(class="grey")
+          | IP Checker
+      br
+      br
+      div(style="border: 2px solid #CC0000; padding: 20px; border-radius: 20px; border-style: inset;")
+        form(action='/process', method='post')
+          div(style="width:320px;")
+            input(id="radio-1", class="radio-custom", type="radio", name="query", value="1", checked=true)
+            label(style="font-family: arial; float: left;", for="radio-1" class="radio-custom-label")
+              | New Query
+            input(id="radio-2", class="radio-custom", type="radio", name="query", value="0")
+            label(style="font-family: arial; float: right;", for="radio-2" class="radio-custom-label")  
+              | Cached Query
+          br
+          br
+          br
+          div(style="text-align:center")
+            input(type="text", name="ip", placeholder="x.x.x.x", value="#{ip}")
+          div(style="text-align:center")
+            input(type="submit", value="Submit")
+      br
+      p(style="text-align: center; color: red;")
+        i #{error}
+      br
+      p 
+        b Usage: 
+        | Displays registrar and virustotal info for the IP. Selecting "Cached Query" may speed up results if the IP has previously been queried and cached in elastic search.
+      br
+      p(style="text-align:center; font-size: 80%;")
+        | IP's cached to date: #{ip_count}

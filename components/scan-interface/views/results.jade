@@ -1,0 +1,45 @@
+doctype
+html
+  head
+    link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
+    script(src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
+    script(src="https://www.gstatic.com/charts/loader.js")
+  body
+    div(class="container")
+      h2
+        | Overall Progress
+      div(class="progress")
+        div(class="progress-bar #{progress}" role="progressbar" aria-valuenow="#{percent}" aria-valuemin="0" aria-valuemax="100" style="width:#{percent}%")
+          | #{percent}%
+    br
+    div(id="chart_div" style="width:800px; margin:auto;")
+    script.
+      google.charts.load('current', {packages: ['corechart', 'bar']});
+      google.charts.setOnLoadCallback(drawStacked);
+      
+      function drawStacked() {
+            var data = google.visualization.arrayToDataTable([
+              ['Scanner', 'Files Scanned', 'Files Left'],
+              ['NSRL', 8008000, 8008000],
+              ['VirusTotal', 8008000, 8008000],
+              ['ClamAV', 8008000, 8008000],
+              ['Wildfire', 8008000, 8008000]
+            ]);
+      
+            var options = {
+              title: 'Individual Scan Progress',
+              chartArea: {width: '70%'},
+              isStacked: true,
+              hAxis: {
+                title: 'File Count',
+                viewWindow: { max: #{tot_files} },
+                minValue: 0
+              },
+              vAxis: {
+                title: 'Scanner'
+              }
+            };
+            var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+          }
