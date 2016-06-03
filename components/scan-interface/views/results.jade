@@ -5,41 +5,155 @@ html
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
     script(src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
     script(src="https://www.gstatic.com/charts/loader.js")
-  body
-    div(class="container")
-      h2
-        | Overall Progress
-      div(class="progress")
-        div(class="progress-bar #{progress}" role="progressbar" aria-valuenow="#{percent}" aria-valuemin="0" aria-valuemax="100" style="width:#{percent}%")
-          | #{percent}%
-    br
-    div(id="chart_div" style="width:800px; margin:auto;")
+    style.
+      .divSquare{
+          width:50%; float: left
+      }
     script.
       google.charts.load('current', {packages: ['corechart', 'bar']});
-      google.charts.setOnLoadCallback(drawStacked);
-      
-      function drawStacked() {
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
             var data = google.visualization.arrayToDataTable([
               ['Scanner', 'Files Scanned', 'Files Left'],
-              ['NSRL', 8008000, 8008000],
-              ['VirusTotal', 8008000, 8008000],
-              ['ClamAV', 8008000, 8008000],
-              ['Wildfire', 8008000, 8008000]
+              ['NSRL', #{tot_files-nsrl_null}, #{nsrl_null}],
+              ['VirusTotal', #{tot_files-vtotal_null}, #{vtotal_null}],
+              ['ClamAV', #{tot_files-clamav_null}, #{clamav_null}],
+              ['Wildfire', #{tot_files-wfire_null}, #{wfire_null}]
             ]);
-      
+
+            var data2 = google.visualization.arrayToDataTable([
+              ['Status', 'Count'],
+              ['Known', #{nsrl_true}],
+              ['Unknown', #{nsrl_false}],
+              ['In Progress', #{nsrl_null}]
+            ]);
+
+            var data3 = google.visualization.arrayToDataTable([
+              ['Status', 'Count'],
+              ['Not Detected', #{vtotal_0}],
+              ['Detected', #{vtotal_gt0}],
+              ['In Progress', #{vtotal_null}]
+            ]);
+
+            var data4 = google.visualization.arrayToDataTable([
+              ['Status', 'Count'],
+              ['Not Flagged', #{clamav_false}],
+              ['Flagged', #{clamav_true}],
+              ['In Progress', #{clamav_null}]
+            ]);
+
+            var data5 = google.visualization.arrayToDataTable([
+              ['Status', 'Count'],
+              ['Not Flagged', #{wfire_false}],
+              ['Flagged', #{wfire_true}],
+              ['In Progress', #{wfire_null}]
+            ]); 
+
             var options = {
               title: 'Individual Scan Progress',
               chartArea: {width: '70%'},
               isStacked: true,
               hAxis: {
-                title: 'File Count',
+                title: 'File Count (#{tot_files} Total)',
                 viewWindow: { max: #{tot_files} },
                 minValue: 0
               },
               vAxis: {
                 title: 'Scanner'
-              }
+              },
+              colors: ['blue','grey']
             };
-            var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
-            chart.draw(data, options);
+
+            var options2 = {
+              slices: {
+                0: { color: '#009900' },
+                1: { color: 'orange' },
+                2: { color: '#BDBDBD' }
+              },
+              title: 'NSRL',
+              pieHole: 0.2,
+              sliceVisibilityThreshold: 0
+            };
+
+            var options3 = {
+              slices: {
+                0: { color: '#00b300' },
+                1: { color: 'red' },
+                2: { color: '#BDBDBD' }
+              },
+              title: 'VirusTotal',
+              pieHole: 0.2,
+              sliceVisibilityThreshold: 0
+            };
+
+            var options4 = {
+              slices: {
+                0: { color: '#00cc00' },
+                1: { color: 'red' },
+                2: { color: '#BDBDBD' }
+              },
+              title: 'ClamAV',
+              pieHole: 0.2,
+              sliceVisibilityThreshold: 0
+            };
+
+            var options5 = {
+              slices: {
+                0: { color: 'green' },
+                1: { color: 'red' },
+                2: { color: '#BDBDBD' }
+              },
+              title: 'WildFire',
+              pieHole: 0.2,
+              sliceVisibilityThreshold: 0
+            };
+
+            var chart1 = new google.visualization.BarChart(document.getElementById('chart_div'));
+            chart1.draw(data, options);
+      
+            var chart2 = new google.visualization.PieChart(document.getElementById('donutchart1'));
+            chart2.draw(data2, options2);
+
+            var chart3 = new google.visualization.PieChart(document.getElementById('donutchart2'));
+            chart3.draw(data3, options3);
+
+            var chart4 = new google.visualization.PieChart(document.getElementById('donutchart3'));
+            chart4.draw(data4, options4);
+
+            var chart5 = new google.visualization.PieChart(document.getElementById('donutchart4'));
+            chart5.draw(data5, options5);
           }
+      function refresh() {
+          location.reload();
+      }
+  body
+    div(class="container")
+      h3
+        span(style="display:inline-block; width:80%;")
+          | #{case_name}&nbsp&nbsp&nbsp
+        span(style="font-size: 60%; text-align:right; display:inline-block; width:20%")
+          | Overall Progress
+      div(class="progress")
+        div(class="progress-bar #{progress}" role="progressbar" aria-valuenow="#{percent}" aria-valuemin="0" aria-valuemax="100" style="width:#{percent}%")
+          | #{status}
+      hr
+    div(id="chart_div" style="width:800px; margin:auto;")
+    div(class="container")
+      h3
+        | Results
+      hr
+    div(style="width:800px; margin:auto;")
+      div(class="divSquare")
+        div(id="donutchart1")
+      div(class="divSquare")
+        div(id="donutchart2")
+      div(style='clear:both')
+      div(class="divSquare")
+        div(id="donutchart3")
+      div(class="divSquare")
+        div(id="donutchart4")
+    div(style='clear:both')
+    div(style="text-align:center;")
+      button(type="button" class="btn btn-default" onclick="refresh()")
+        | Refresh

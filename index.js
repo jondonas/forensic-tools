@@ -42,11 +42,16 @@ app.get('/cases', function (req, res) {
 app.get('/forensic-cases', function (req, res) {
     var url = "mongodb://jdonas:NCIR4525@192.168.0.113/paladion-cases";
     MongoClient.connect(url, function(err, db) {
-        var collection = db.collection('cases');
-        collection.find({}).toArray(function(err, docs) {
-            res.render("/home/jdonas/web-interface/components/scan-interface/views/index", { cases : JSON.parse(JSON.stringify(docs)) });
-        db.close();
-        });
+        if (err) {
+            res.send("Oops! We seem to have run into an error: " + err);
+        }
+        else {
+            var collection = db.collection('cases');
+            collection.find({}).toArray(function(err, docs) {
+                res.render("/home/jdonas/web-interface/components/scan-interface/views/index", { cases : JSON.parse(JSON.stringify(docs)) });
+            db.close();
+            });
+        }
     });
 });
 
@@ -56,15 +61,14 @@ app.get('/forensic-cases', function (req, res) {
 
 app.get('/cases/:case', function (req, res) {
     var search = 
-      [{"nsrl": true}, {"nsrl": false}, {"nsrl": null}, {"virustotalpercentage": null}, 
-       {"virustotalpercentage": 0}, {"virustotalpercentage": {"$gt": 0}},
-       {"virustotalpercentage": {"$gt": 10}}, {"clamavmalware": null}, 
+      [{"virustotalpercentage": null}, {"virustotalpercentage": 0}, 
+       {"virustotalpercentage": {"$gt": 0}}, {"virustotalpercentage": {"$gt": 10}}, 
+       {"nsrl": null}, {"nsrl": true}, {"nsrl": false}, {"clamavmalware": null}, 
        {"clamavmalware": true}, {"clamavmalware": false}, {"wildfiremalware": null},
        {"wildfiremalware": true}, {"wildfiremalware": false}, {}];
     var results = [];
     var finished = _.after(1, doRender);
 
-    console.log(search); 
     // connects to mongo
     var case_name = req.params.case;
     var url = "mongodb://jdonas:NCIR4525@192.168.0.113/" + case_name +"?authSource=admin";
@@ -72,6 +76,7 @@ app.get('/cases/:case', function (req, res) {
         var finInfo = _.after(search.length, doClose);
         var collection = db.collection('files');
 
+        // gets info
         search.forEach(function (value, i) {
             collection.count(value, function (err, num) {
                 results.push({index: i, result: num});
@@ -93,30 +98,35 @@ app.get('/cases/:case', function (req, res) {
         return 1;
     }
     
-    // renders page
+    // calculates statistics and renders page
     function doRender() {
-        console.log(results);
-        console.log("******************");
         results.sort(compare);
-        console.log(results);
-        var left = results[2].result + results[3].result + results[7].result + results[10].result;
+        var left = results[0].result + results[4].result + results[7].result + results[10].result;
         var tot = (results[13].result*4);
-        console.log(tot+" *** "+left)
         var percent = Math.round(((tot - left)/tot)*100);
-        console.log("Percent: " + percent);
- 
+        var status;
+
         var progress;
-        if (percent == 100)
+        if (results[5].result == 0 && results[6].result == 0) {
+            progress = "progress-bar-striped progress-bar-warning active";
+            status = "HASHING IN PROGRESS";
+            percent = 100;
+        }
+        else if (percent == 100) {
             progress = "progress-bar-success";
-        else
+            status = "COMPLETE";
+        }
+        else {
             progress = "progress-bar-striped active";
+            status = percent.toString() + "% COMPLETE";
+        }
 
         res.render("/home/jdonas/web-interface/components/scan-interface/views/results", 
-          { percent: percent, progress: progress, tot_files: tot,
-            vtotal_null: , vtotal_0: , vtotal_gt0: , vtotal_gt10: ,
-            nsrl_null: , nsrl_true: , nsrl_false: ,
-            clamav_null: , clamav_true: , clamav_false: ,
-            wfire_null: , wfire_true: , wfire_false: });
+          { percent: percent, progress: progress, tot_files: results[13].result, case_name: case_name, status: status,
+            vtotal_null: results[0].result, vtotal_0: results[1].result, vtotal_gt0: results[2].result, vtotal_gt10: results[3].result,
+            nsrl_null: results[4].result, nsrl_true: results[5].result, nsrl_false: results[6].result,
+            clamav_null: results[7].result, clamav_true: results[8].result, clamav_false: results[9].result,
+            wfire_null: results[10].result, wfire_true: results[11].result, wfire_false: results[12].result});
     }
 
 });
@@ -124,7 +134,7 @@ app.get('/cases/:case', function (req, res) {
 
 ////////////////////////////////////////////
 
-
+// home page for ip-checker module
 app.get('/ip-check', function (req, res) {
   var data = JSON.parse(execSync('/home/jdonas/web-interface/components/ip-checker/scripts/num_ip.py'));
   var count = data["aggregations"]["counts"]["value"];
@@ -171,6 +181,7 @@ app.post('/process', function(req, res) {
     req.session.message = "IP has not been cached. Please select 'New Query'";
     res.redirect('/ip-check');
   }
+  // does the processing
   else {
 
     var finished = _.after(3, doRender);
@@ -281,6 +292,7 @@ console.log(iptohost);
     }
 
     function doRender() {
+
       query_time += vir_stdout["took"] + reg_stdout["took"];
       // VirusTotal statistics
       var d_comm, d_down, d_urls, resolutions, comm_score, down_score, urls_score;
