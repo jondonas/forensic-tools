@@ -2,9 +2,14 @@ doctype
 html
   head
     link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
+    // link(rel="stylesheet", href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css")
+    link(rel="stylesheet", href="http://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
-    script(src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
+    script(src="http://cdn.datatables.net/1.10.12/js/jquery.dataTables.js")
+    script(src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js")
+    // script(src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
     script(src="https://www.gstatic.com/charts/loader.js")
+    // script(src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js")
     style.
       .divSquare{
           width:50%; float: left
@@ -15,40 +20,57 @@ html
 
       function drawChart() {
             var data = google.visualization.arrayToDataTable([
-              ['Scanner', 'Files Scanned', 'Files Left'],
-              ['NSRL', #{tot_files-nsrl_null}, #{nsrl_null}],
-              ['VirusTotal', #{tot_files-vtotal_null}, #{vtotal_null}],
-              ['ClamAV', #{tot_files-clamav_null}, #{clamav_null}],
-              ['Wildfire', #{tot_files-wfire_null}, #{wfire_null}]
+              ['Scanner', 'Scanned', 'Pending', 'Not Being Scanned'],
+              ['NSRL', #{tot_files-nsrl_null}, #{nsrl_null}, 0],
+              ['VirusTotal', #{vtotal_ne_null}, #{vtotal_pending}, #{tot_files-vtotal_ne_null-vtotal_pending}],
+              ['ClamAV', #{tot_files-clamav_null}, #{clamav_null}, 0],
+              ['Wildfire', #{tot_files-wfire_null}, 0, #{wfire_null}]
             ]);
 
             var data2 = google.visualization.arrayToDataTable([
               ['Status', 'Count'],
               ['Known', #{nsrl_true}],
               ['Unknown', #{nsrl_false}],
-              ['In Progress', #{nsrl_null}]
+              ['Pending', #{nsrl_null}]
             ]);
 
             var data3 = google.visualization.arrayToDataTable([
               ['Status', 'Count'],
-              ['Not Detected', #{vtotal_0}],
-              ['Detected', #{vtotal_gt0}],
-              ['In Progress', #{vtotal_null}]
+              ['VTotal Known', #{vtotal_0}],
+              ['Not EXE/DLL', #{vtotal_neutral}],
+              ['Pending', #{vtotal_pending}],
+              ['Detected', #{vtotal_gt0}]
             ]);
 
             var data4 = google.visualization.arrayToDataTable([
               ['Status', 'Count'],
               ['Not Flagged', #{clamav_false}],
               ['Flagged', #{clamav_true}],
-              ['In Progress', #{clamav_null}]
+              ['Pending', #{clamav_null}]
             ]);
 
-            var data5 = google.visualization.arrayToDataTable([
-              ['Status', 'Count'],
-              ['Not Flagged', #{wfire_false}],
-              ['Flagged', #{wfire_true}],
-              ['In Progress', #{wfire_null}]
-            ]); 
+            var data5;
+            var sliceoption;
+            if (#{wfire_null} == #{tot_files}) {
+                data5 = google.visualization.arrayToDataTable([
+                  ['Status', 'Count'],
+                  ['No Scans Completed', #{tot_files}]
+                ]);
+                sliceoption = {
+                    0: { color: '#BDBDBD' }
+                };
+            }
+            else {
+                data5 = google.visualization.arrayToDataTable([
+                  ['Status', 'Count'],
+                  ['Not Flagged', #{wfire_false}],
+                  ['Flagged', #{wfire_true}]
+                ]);
+                sliceoption = {
+                    0: { color: '#00b300' },
+                    1: { color: 'red', offset: offset4 }
+                };
+            }
 
             var options = {
               title: 'Individual Scan Progress',
@@ -62,66 +84,86 @@ html
               vAxis: {
                 title: 'Scanner'
               },
-              colors: ['blue','grey']
+              colors: ['blue','#cc00cc', 'grey']
             };
 
             var options2 = {
               slices: {
-                0: { color: '#009900' },
+                0: { color: '#009900'},
                 1: { color: 'orange' },
-                2: { color: '#BDBDBD' }
+                2: { color: '#cc00cc' }
               },
               title: 'NSRL',
-              pieHole: 0.2,
-              sliceVisibilityThreshold: 0
+              sliceVisibilityThreshold: 0,
+              is3D: true,
+              pieSliceText: 'value'
             };
+
+            var offset3;
+            if (#{vtotal_gt0} == 0)
+                offset3 = 0;
+            else
+                offset3 = 0.2;
 
             var options3 = {
               slices: {
-                0: { color: '#00b300' },
-                1: { color: 'red' },
-                2: { color: '#BDBDBD' }
+                0: { color: '#00cc00' },
+                1: { color: '#af8788'},
+                2: { color: '#cc00cc' },
+                3: { color: 'red', offset: offset3 }
               },
-              title: 'VirusTotal',
-              pieHole: 0.2,
-              sliceVisibilityThreshold: 0
+              title: 'VirusTotal (Excludes NSRL Known)',
+              sliceVisibilityThreshold: 0,
+              is3D: true,
+              pieSliceText: 'value'
             };
+
+            var offset4;
+            if (#{clamav_true} == 0)
+                offset4 = 0;
+            else
+                offset4 = 0.2;
+
 
             var options4 = {
               slices: {
-                0: { color: '#00cc00' },
-                1: { color: 'red' },
-                2: { color: '#BDBDBD' }
+                0: { color: '#00b300' },
+                1: { color: 'red', offset: offset4 },
+                2: { color: '#cc00cc' }
               },
               title: 'ClamAV',
-              pieHole: 0.2,
-              sliceVisibilityThreshold: 0
+              sliceVisibilityThreshold: 0,
+              is3D: true,
+              pieSliceText: 'value'
             };
 
+            var offset5;
+            if (#{wfire_true} == 0)
+                offset5 = 0;
+            else
+                offset5 = 0.2;
+
             var options5 = {
-              slices: {
-                0: { color: 'green' },
-                1: { color: 'red' },
-                2: { color: '#BDBDBD' }
-              },
+              slices: sliceoption,
               title: 'WildFire',
-              pieHole: 0.2,
-              sliceVisibilityThreshold: 0
+              sliceVisibilityThreshold: 0,
+              is3D: true,
+              pieSliceText: 'value'
             };
 
             var chart1 = new google.visualization.BarChart(document.getElementById('chart_div'));
             chart1.draw(data, options);
       
-            var chart2 = new google.visualization.PieChart(document.getElementById('donutchart1'));
+            var chart2 = new google.visualization.PieChart(document.getElementById('piechart1'));
             chart2.draw(data2, options2);
 
-            var chart3 = new google.visualization.PieChart(document.getElementById('donutchart2'));
+            var chart3 = new google.visualization.PieChart(document.getElementById('piechart2'));
             chart3.draw(data3, options3);
 
-            var chart4 = new google.visualization.PieChart(document.getElementById('donutchart3'));
+            var chart4 = new google.visualization.PieChart(document.getElementById('piechart3'));
             chart4.draw(data4, options4);
 
-            var chart5 = new google.visualization.PieChart(document.getElementById('donutchart4'));
+            var chart5 = new google.visualization.PieChart(document.getElementById('piechart4'));
             chart5.draw(data5, options5);
           }
       function refresh() {
@@ -145,15 +187,69 @@ html
       hr
     div(style="width:800px; margin:auto;")
       div(class="divSquare")
-        div(id="donutchart1")
+        div(id="piechart1")
       div(class="divSquare")
-        div(id="donutchart2")
+        div(id="piechart2")
       div(style='clear:both')
       div(class="divSquare")
-        div(id="donutchart3")
+        div(id="piechart3")
       div(class="divSquare")
-        div(id="donutchart4")
+        div(id="piechart4")
     div(style='clear:both')
-    div(style="text-align:center;")
+    div(style="text-align:center; width:100px; margin:auto;")
       button(type="button" class="btn btn-default" onclick="refresh()")
-        | Refresh
+        | &#8635 Refresh
+    br
+    br
+    div(class="container")
+      h3
+        | ClamAV Flagged Files
+      hr
+    div(style="margin:auto; width: 90%;")
+      table(id="clamav" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
+        thead
+          tr
+            th Path
+            th FileType
+        tbody
+          each result in clam_detections
+            tr
+              td
+                a(href="/cases/#{case_name}")
+                  | #{result.filename}
+              td #{result.filetype}
+    script.
+      $(document).ready(function() {
+          var table = $('#clamav').DataTable();
+      });
+    br
+    br
+
+  //-
+    div(class="container")
+      h3
+        | VirusTotal Flagged Files
+      hr
+    div(style="margin:auto; width: 90%;")
+      table(id="vtotal" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
+        thead
+          tr
+            th Path
+            th FileType
+        tbody
+         each result in vtotal_detections
+            tr
+              td
+                a(href="/cases/#{case_name}")
+                  | #{result.filename}
+              td #{result.filetype}
+    script.
+      $(document).ready(function() {
+          var table = $('#vtotal').DataTable();
+      });
+
+  //-
+    div(data-role="collapsible")
+      h1 VirusTotal Detections
+      p
+        | Test

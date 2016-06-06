@@ -48,7 +48,7 @@ app.get('/forensic-cases', function (req, res) {
         else {
             var collection = db.collection('cases');
             collection.find({}).toArray(function(err, docs) {
-                res.render("/home/jdonas/web-interface/components/scan-interface/views/index", { cases : JSON.parse(JSON.stringify(docs)) });
+                res.render("/home/jdonas/web-interface/components/scan-interface/views/index", { cases : docs });
             db.close();
             });
         }
@@ -65,15 +65,19 @@ app.get('/cases/:case', function (req, res) {
        {"virustotalpercentage": {"$gt": 0}}, {"virustotalpercentage": {"$gt": 10}}, 
        {"nsrl": null}, {"nsrl": true}, {"nsrl": false}, {"clamavmalware": null}, 
        {"clamavmalware": true}, {"clamavmalware": false}, {"wildfiremalware": null},
-       {"wildfiremalware": true}, {"wildfiremalware": false}, {}];
+       {"wildfiremalware": true}, {"wildfiremalware": false}, {}, 
+       {"virustotaldate": null, "nsrl": false, "filetype": /exe|dll/i},
+       {"virustotalpercentage": {$ne: null}}, {"virustotaldate": null, "nsrl": true},
+       {"virustotaldate": null, "nsrl": false, "filetype": {$not: /exe|dll/i}}];
     var results = [];
     var finished = _.after(1, doRender);
+    var clam_detections;
 
     // connects to mongo
     var case_name = req.params.case;
     var url = "mongodb://jdonas:NCIR4525@192.168.0.113/" + case_name +"?authSource=admin";
     MongoClient.connect(url, function(err, db) {
-        var finInfo = _.after(search.length, doClose);
+        var finInfo = _.after(search.length+1, doClose);
         var collection = db.collection('files');
 
         // gets info
@@ -82,6 +86,16 @@ app.get('/cases/:case', function (req, res) {
                 results.push({index: i, result: num});
                 finInfo();
             });
+        });
+
+        collection.find({"clamavmalware": true, nsrl:false}).toArray(function(err, docs) {
+            clam_detections = docs;
+            for (var i = 0; i < clam_detections.length; ++i) {
+                var splitpath = clam_detections[i]["fullpath"].split('/');
+                clam_detections[i].filename = splitpath[splitpath.length-1];
+            }
+            console.log(clam_detections);
+            finInfo();
         });
 
         function doClose() {
@@ -101,9 +115,9 @@ app.get('/cases/:case', function (req, res) {
     // calculates statistics and renders page
     function doRender() {
         results.sort(compare);
-        var left = results[0].result + results[4].result + results[7].result + results[10].result;
-        var tot = (results[13].result*4);
-        var percent = Math.round(((tot - left)/tot)*100);
+        var left = results[4].result + results[7].result + results[14].result;
+        var tot = results[13].result*2 + results[14].result + results[15].result;
+        var percent = Math.floor(((tot - left)/tot)*100);
         var status;
 
         var progress;
@@ -122,11 +136,13 @@ app.get('/cases/:case', function (req, res) {
         }
 
         res.render("/home/jdonas/web-interface/components/scan-interface/views/results", 
-          { percent: percent, progress: progress, tot_files: results[13].result, case_name: case_name, status: status,
+          { percent: percent, progress: progress, tot_files: results[13].result, case_name: case_name, status: status, clam_detections: clam_detections,
             vtotal_null: results[0].result, vtotal_0: results[1].result, vtotal_gt0: results[2].result, vtotal_gt10: results[3].result,
             nsrl_null: results[4].result, nsrl_true: results[5].result, nsrl_false: results[6].result,
             clamav_null: results[7].result, clamav_true: results[8].result, clamav_false: results[9].result,
-            wfire_null: results[10].result, wfire_true: results[11].result, wfire_false: results[12].result});
+            wfire_null: results[10].result, wfire_true: results[11].result, wfire_false: results[12].result,
+            vtotal_pending: results[14].result, vtotal_ne_null: results[15].result,
+            vtotal_known: results[16].result, vtotal_neutral: results[17].result});
     }
 
 });
