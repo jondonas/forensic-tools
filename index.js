@@ -62,7 +62,7 @@ app.get('/forensic-cases', function (req, res) {
 app.get('/cases/:case', function (req, res) {
     var search = 
       [{"virustotalpercentage": null}, {"virustotalpercentage": 0}, 
-       {"virustotalpercentage": {"$gt": 0}}, {"virustotalpercentage": {"$gt": 10}}, 
+       {"virustotalpercentage": {"$gt": 5}}, {"virustotalpercentage": {"$gt": 10}}, 
        {"nsrl": null}, {"nsrl": true}, {"nsrl": false}, {"clamavmalware": null}, 
        {"clamavmalware": true}, {"clamavmalware": false}, {"wildfiremalware": null},
        {"wildfiremalware": true}, {"wildfiremalware": false}, {}, 
@@ -72,12 +72,13 @@ app.get('/cases/:case', function (req, res) {
     var results = [];
     var finished = _.after(1, doRender);
     var clam_detections;
+    var vtotal_detections;
 
     // connects to mongo
     var case_name = req.params.case;
     var url = "mongodb://jdonas:NCIR4525@192.168.0.113/" + case_name +"?authSource=admin";
     MongoClient.connect(url, function(err, db) {
-        var finInfo = _.after(search.length+1, doClose);
+        var finInfo = _.after(search.length+2, doClose);
         var collection = db.collection('files');
 
         // gets info
@@ -94,7 +95,15 @@ app.get('/cases/:case', function (req, res) {
                 var splitpath = clam_detections[i]["fullpath"].split('/');
                 clam_detections[i].filename = splitpath[splitpath.length-1];
             }
-            console.log(clam_detections);
+            finInfo();
+        });
+
+        collection.find({"virustotalpercentage":{"$gt": 5}}).toArray(function(err, docs) {
+            vtotal_detections = docs;
+            for (var i = 0; i < vtotal_detections.length; ++i) {
+                var splitpath = vtotal_detections[i]["fullpath"].split('/');
+                vtotal_detections[i].filename = splitpath[splitpath.length-1];
+            }
             finInfo();
         });
 
@@ -136,8 +145,8 @@ app.get('/cases/:case', function (req, res) {
         }
 
         res.render("/home/jdonas/web-interface/components/scan-interface/views/results", 
-          { percent: percent, progress: progress, tot_files: results[13].result, case_name: case_name, status: status, clam_detections: clam_detections,
-            vtotal_null: results[0].result, vtotal_0: results[1].result, vtotal_gt0: results[2].result, vtotal_gt10: results[3].result,
+          { percent: percent, progress: progress, tot_files: results[13].result, case_name: case_name, status: status, clam_detections: clam_detections, vtotal_detections: vtotal_detections,
+            vtotal_null: results[0].result, vtotal_0: results[1].result, vtotal_gt5: results[2].result, vtotal_gt10: results[3].result,
             nsrl_null: results[4].result, nsrl_true: results[5].result, nsrl_false: results[6].result,
             clamav_null: results[7].result, clamav_true: results[8].result, clamav_false: results[9].result,
             wfire_null: results[10].result, wfire_true: results[11].result, wfire_false: results[12].result,

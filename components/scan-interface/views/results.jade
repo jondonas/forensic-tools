@@ -2,14 +2,14 @@ doctype
 html
   head
     link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
-    // link(rel="stylesheet", href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css")
+    link(rel="stylesheet", href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css")
     link(rel="stylesheet", href="http://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
     script(src="http://cdn.datatables.net/1.10.12/js/jquery.dataTables.js")
     script(src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js")
     // script(src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
     script(src="https://www.gstatic.com/charts/loader.js")
-    // script(src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js")
+    script(src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js")
     style.
       .divSquare{
           width:50%; float: left
@@ -39,7 +39,7 @@ html
               ['VTotal Known', #{vtotal_0}],
               ['Not EXE/DLL', #{vtotal_neutral}],
               ['Pending', #{vtotal_pending}],
-              ['Detected', #{vtotal_gt0}]
+              ['> 5% Detection', #{vtotal_gt5}]
             ]);
 
             var data4 = google.visualization.arrayToDataTable([
@@ -67,7 +67,7 @@ html
                   ['Flagged', #{wfire_true}]
                 ]);
                 sliceoption = {
-                    0: { color: '#00b300' },
+                    0: { color: '#009900' },
                     1: { color: 'red', offset: offset4 }
                 };
             }
@@ -84,7 +84,8 @@ html
               vAxis: {
                 title: 'Scanner'
               },
-              colors: ['blue','#cc00cc', 'grey']
+              colors: ['blue','#cc00cc', 'grey'],
+              backgroundColor: { fill:'transparent' }
             };
 
             var options2 = {
@@ -96,11 +97,13 @@ html
               title: 'NSRL',
               sliceVisibilityThreshold: 0,
               is3D: true,
-              pieSliceText: 'value'
+              pieSliceText: 'value',
+              backgroundColor: { fill:'transparent' },
+              'legend': {'position': 'bottom'}
             };
 
             var offset3;
-            if (#{vtotal_gt0} == 0)
+            if (#{vtotal_gt5} == 0)
                 offset3 = 0;
             else
                 offset3 = 0.2;
@@ -115,7 +118,9 @@ html
               title: 'VirusTotal (Excludes NSRL Known)',
               sliceVisibilityThreshold: 0,
               is3D: true,
-              pieSliceText: 'value'
+              pieSliceText: 'value',
+              backgroundColor: { fill:'transparent' },
+              'legend': {'position': 'bottom'}
             };
 
             var offset4;
@@ -134,7 +139,9 @@ html
               title: 'ClamAV',
               sliceVisibilityThreshold: 0,
               is3D: true,
-              pieSliceText: 'value'
+              pieSliceText: 'value',
+              backgroundColor: { fill:'transparent' },
+              'legend': {'position': 'bottom'}
             };
 
             var offset5;
@@ -148,7 +155,9 @@ html
               title: 'WildFire',
               sliceVisibilityThreshold: 0,
               is3D: true,
-              pieSliceText: 'value'
+              pieSliceText: 'value',
+              backgroundColor: { fill:'transparent' },
+              'legend': {'position': 'bottom'}
             };
 
             var chart1 = new google.visualization.BarChart(document.getElementById('chart_div'));
@@ -181,71 +190,135 @@ html
           | #{status}
       hr
     div(id="chart_div" style="width:800px; margin:auto;")
-    div(class="container")
+    div(class="container" style="width:800px; margin:auto;")
       h3
-        | Results
-      hr
+        span(style="display:inline-block; width:670px;")
+          | Results
+        span(style="display:inline-block; width:100px;")
+          button(type="button" style="padding:2px;" class="btn btn-default" onclick="refresh()")
+            | &#8635 Refresh
+    //  hr
     div(style="width:800px; margin:auto;")
       div(class="divSquare")
         div(id="piechart1")
       div(class="divSquare")
         div(id="piechart2")
       div(style='clear:both')
+      div(style="width:400px; margin:auto;")
+        hr
       div(class="divSquare")
         div(id="piechart3")
       div(class="divSquare")
         div(id="piechart4")
-    div(style='clear:both')
-    div(style="text-align:center; width:100px; margin:auto;")
-      button(type="button" class="btn btn-default" onclick="refresh()")
-        | &#8635 Refresh
-    br
-    br
+        br
+        br
+        br
+      div(style='clear:both')
     div(class="container")
       h3
         | ClamAV Flagged Files
       hr
-    div(style="margin:auto; width: 90%;")
-      table(id="clamav" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
-        thead
-          tr
-            th Path
-            th FileType
-        tbody
-          each result in clam_detections
+      div(style="margin:auto; width: 90%;")
+        table(id="clamav" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
+          thead
             tr
-              td
-                a(href="/cases/#{case_name}")
-                  | #{result.filename}
-              td #{result.filetype}
+              th File Name
+              th File Type
+          tbody
+            each result in clam_detections
+              tr
+                td
+                  a(href="#clamav_popper" data-rel="popup")
+                    | #{result.filename}
+                  div(data-role="popup" id="clamav_popper" class="ui-content" data-position-to="window" data-overlay-theme="a" data-theme="b" data-transition="fade")
+                    h3(style="text-align: center;")
+                      | #{result.filename}
+                    br
+                    p
+                      b File Type: &nbsp
+                      | #{result.filetype}
+                    p
+                      b Full Path: &nbsp
+                      | #{result.fullpath}
+                    p
+                      b mtime: &nbsp
+                      | #{result.mtime}
+                    p
+                      b ctime: &nbsp
+                      | #{result.ctime}
+                    p
+                      b atime: &nbsp
+                      | #{result.atime}
+                    p
+                      b Hash: &nbsp
+                      | #{result.hash}
+                    br
+                    p
+                      b Packer: &nbsp
+                      | #{result.packer}
+                    p
+                      b Yara Flag: &nbsp
+                      | #{result.yaramalwareflag}
+                td #{result.filetype}
+      br
+      br
+      div(class="container")
+        h3
+          | VirusTotal > 5% Detection
+        hr
+      div(style="margin:auto; width: 90%;")
+        table(id="vtotal" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
+          thead
+            tr
+              th File Name
+              th File Type
+          tbody
+           each result in vtotal_detections
+              tr
+                td
+                  a(href="#vtotal_popper" data-rel="popup")
+                    | #{result.filename}
+                  div(data-role="popup" id="vtotal_popper" class="ui-content" data-position-to="window" data-overlay-theme="a" data-theme="b" data-transition="fade")
+                    h3(style="text-align: center;")
+                      | #{result.filename}
+                    br
+                    p
+                      b File Type: &nbsp
+                      | #{result.filetype}
+                    p
+                      b Full Path: &nbsp
+                      | #{result.fullpath}
+                    p
+                      b mtime: &nbsp
+                      | #{result.mtime}
+                    p
+                      b ctime: &nbsp
+                      | #{result.ctime}
+                    p
+                      b atime: &nbsp
+                      | #{result.atime}
+                    p
+                      b Hash: &nbsp
+                      | #{result.hash}
+                    br
+                    p
+                      b VirusTotal %: &nbsp
+                      | #{result.virustotalpercentage}
+                    p
+                      b VirusTotal Date: &nbsp
+                      | #{result.virustotaldate}
+                    p
+                      b Packer: &nbsp
+                      | #{result.packer}
+                    p
+                      b Yara Flag: &nbsp
+                      | #{result.yaramalwareflag}
+                td #{result.filetype}
     script.
       $(document).ready(function() {
-          var table = $('#clamav').DataTable();
-      });
-    br
-    br
-
-  //-
-    div(class="container")
-      h3
-        | VirusTotal Flagged Files
-      hr
-    div(style="margin:auto; width: 90%;")
-      table(id="vtotal" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
-        thead
-          tr
-            th Path
-            th FileType
-        tbody
-         each result in vtotal_detections
-            tr
-              td
-                a(href="/cases/#{case_name}")
-                  | #{result.filename}
-              td #{result.filetype}
-    script.
-      $(document).ready(function() {
-          var table = $('#vtotal').DataTable();
+          var table1 = $('#clamav').DataTable();
+          var table2 = $('#vtotal').DataTable();
+          $.mobile.ajaxEnabled=false;
       });
 
   //-
