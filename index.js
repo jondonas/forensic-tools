@@ -69,7 +69,12 @@ app.get('/cases/:case', function (req, res) {
        {"virustotaldate": null, "nsrl": false, "filetype": /exe|dll/i},
        {"virustotalpercentage": {$ne: null}}, {"virustotaldate": null, "nsrl": true},
        {"virustotaldate": null, "nsrl": false, "filetype": {$not: /exe|dll/i}}];
+    var stages =
+      [{"stagename": "fingerprinting"}, {"stagename": "nsrl"},
+       {"stagename": "chromehistory"}, {"stagename": "virustotal"},
+       {"stagename": "wildfire"}, {"stagename": "clamav"}]
     var results = [];
+    var stage_results = [];
     var finished = _.after(1, doRender);
     var clam_detections;
     var vtotal_detections;
@@ -78,7 +83,7 @@ app.get('/cases/:case', function (req, res) {
     var case_name = req.params.case;
     var url = "mongodb://jdonas:NCIR4525@192.168.0.113/" + case_name +"?authSource=admin";
     MongoClient.connect(url, function(err, db) {
-        var finInfo = _.after(search.length+2, doClose);
+        var finInfo = _.after(search.length+stages.length+2, doClose);
         var collection = db.collection('files');
 
         // gets info
@@ -105,6 +110,15 @@ app.get('/cases/:case', function (req, res) {
                 vtotal_detections[i].filename = splitpath[splitpath.length-1];
             }
             finInfo();
+        });
+
+        var collection2 = db.collection('stages');
+
+        stages.forEach(function (value, i) {
+            collection2.count(value, function (err, num) {
+                stage_results[value["stagename"]] = num;
+                finInfo();
+            });
         });
 
         function doClose() {
@@ -140,8 +154,24 @@ app.get('/cases/:case', function (req, res) {
             status = "COMPLETE";
         }
         else {
+            var stage;
+            if (stage_results["wildfire"])
+                stage = "% (STAGE: ClamAV)";
+            else if (stage_results["virustotal"])
+                stage = "% (STAGE: WildFire)";
+            // removed for now for compatibility
+            //else if (stage_results["chromehistory"])
+                //stage = "% (STAGE: VirusTotal)";
+            else if (stage_results["nsrl"])
+                stage = "% (STAGE: VirusTotal)";
+                //stage = "% (STAGE: Chrome History)";
+            else if (stage_results["fingerprinting"])
+                stage = "% (STAGE: NSRL)";
+            else
+                stage = "% COMPLETE";
+
             progress = "progress-bar-striped active";
-            status = percent.toString() + "% COMPLETE";
+            status = percent.toString() + stage;
         }
 
         res.render("/home/jdonas/web-interface/components/scan-interface/views/results", 

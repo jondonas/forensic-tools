@@ -216,7 +216,10 @@ html
       div(style='clear:both')
     div(class="container")
       h3
-        | ClamAV Flagged Files
+        span(style="vertical-align:middle;")
+          | ClamAV Flagged Files&nbsp&nbsp&nbsp
+          img(src='/components/scan-interface/static/clam.png' height='25' style="bottom: 2px; position:relative;")
+        // ClamAV Flagged Files
       hr
       div(style="margin:auto; width: 90%;")
         table(id="clamav" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
@@ -225,14 +228,15 @@ html
               th File Name
               th File Type
           tbody
-            each result in clam_detections
+            each result, ind in clam_detections
               tr
                 td
-                  a(href="#clamav_popper" data-rel="popup")
+                  a(href="#clamav_popper"+ind data-rel="popup")
                     | #{result.filename}
-                  div(data-role="popup" id="clamav_popper" class="ui-content" data-position-to="window" data-overlay-theme="a" data-theme="b" data-transition="fade")
+                  div(data-role="popup" id="clamav_popper"+ind class="ui-content" data-position-to="window" data-overlay-theme="a" data-theme="b" data-transition="fade")
                     h3(style="text-align: center;")
                       | #{result.filename}
+                    hr(style="width:75%;")
                     br
                     p
                       b File Type: &nbsp
@@ -256,15 +260,17 @@ html
                     p
                       b Packer: &nbsp
                       | #{result.packer}
-                    p
+                    p(style="padding-bottom: 10px;")
                       b Yara Flag: &nbsp
                       | #{result.yaramalwareflag}
                 td #{result.filetype}
       br
       br
-      div(class="container")
-        h3
-          | VirusTotal > 5% Detection
+    div(class="container")
+      h3
+        span(style="vertical-align:middle;")
+          | VirusTotal > 5% Detection&nbsp&nbsp&nbsp
+          img(src='/components/scan-interface/static/virus.png' height='25' style="bottom: 2px; position:relative;")
         hr
       div(style="margin:auto; width: 90%;")
         table(id="vtotal" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
@@ -273,14 +279,15 @@ html
               th File Name
               th File Type
           tbody
-           each result in vtotal_detections
+           each result, ind in vtotal_detections
               tr
                 td
-                  a(href="#vtotal_popper" data-rel="popup")
+                  a(href="#vtotal_popper"+ind data-rel="popup")
                     | #{result.filename}
-                  div(data-role="popup" id="vtotal_popper" class="ui-content" data-position-to="window" data-overlay-theme="a" data-theme="b" data-transition="fade")
+                  div(data-role="popup" id="vtotal_popper"+ind class="ui-content" data-position-to="window" data-overlay-theme="a" data-theme="b" data-transition="fade")
                     h3(style="text-align: center;")
                       | #{result.filename}
+                    hr(style="width:75%;")
                     br
                     p
                       b File Type: &nbsp
@@ -310,7 +317,7 @@ html
                     p
                       b Packer: &nbsp
                       | #{result.packer}
-                    p
+                    p(style="padding-bottom: 10px;")
                       b Yara Flag: &nbsp
                       | #{result.yaramalwareflag}
                 td #{result.filetype}
@@ -318,11 +325,4 @@ html
       $(document).ready(function() {
           var table1 = $('#clamav').DataTable();
           var table2 = $('#vtotal').DataTable();
-          $.mobile.ajaxEnabled=false;
       });
-
-  //-
-    div(data-role="collapsible")
-      h1 VirusTotal Detections
-      p
-        | Test

@@ -6,28 +6,77 @@ html
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
     script(src="http://cdn.datatables.net/1.10.12/js/jquery.dataTables.js")
     script(src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js")
+    script(src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
   body
     div(class="container")
       div(class="page-header")
-        h2
-          | Database Entries
+        h1(align="center")
+          span(style="vertical-align:middle;")
+            | Control Panel&nbsp&nbsp
+            img(src='/components/scan-interface/static/control.png' height='33' style="bottom: 3px; position:relative;")
     br
-    div(style="margin:auto; width: 90%;")
-      table(id="example" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
-        thead
-          tr
-            th Case
-            th ID
-            th Last Updated
-        tbody
-          each result in cases
+    div(style="text-align:center;" class="dropdown")
+      button(class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown")
+        | Choose Drive&nbsp&nbsp
+        span(class="caret")
+      ul(class="dropdown-menu" style="left:50%; right:auto; text-align:center; transform:translate(-50%, 0);")
+        li(style="display: inline-block; border-right:1px solid grey;")
+          a(href="#")
+            | C:
+        li(style="display: inline-block; border-right:1px solid grey;")
+          a(href="#")
+            | D:
+        li(style="display: inline-block;")
+          a(href="#")
+            | E:
+    div(style="height:5px;")
+    div(class="form-group" style="width:300px; margin:auto;")
+      input(type="text" class="form-control" id="case_name" placeholder="Enter Case Name" style="visibility:hidden;")
+    p(style="text-align:center; height:24px;" id="info_text")
+      i
+        | Select an attached drive to begin analysis.
+    div(style="height:5px;")
+    div(style="text-align:center;")
+      button(class="btn btn-primary" id="submit-button" style="width:300px; display:none; visibility:hidden;")
+        | Start Analysis &#8658
+    div(class="container")
+      div(class="page-header")
+        h3
+          span(style="vertical-align:middle;")
+            | Database Entries&nbsp&nbsp&nbsp
+            img(src='/components/scan-interface/static/database.png' height='20' style="bottom: 2px; position:relative;")
+      div(style="margin:auto;")
+        table(id="example" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
+          thead
             tr
-              td 
-                a(href="/cases/#{result.case}")
-                  | #{result.case}
-              td #{result._id}
-              td #{result.lastupdate}
+              th Case
+              th ID
+              th Last Updated
+          tbody
+            each result in cases
+              tr
+                td 
+                  a(href="/cases/#{result.case}")
+                    | #{result.case}
+                td #{result._id}
+                td #{result.lastupdate}
     script.
+      $(".dropdown-menu li a").click(function() {
+        var selText = $(this).text();
+        $("#info_text").css("display", "none");
+        $("#case_name").css("visibility", "visible");
+        $("#submit-button").css("display", "inline");
+        $(this).parents('.dropdown').find('.dropdown-toggle').html('('+selText+') Selected  <span class="caret"></span>');
+      });
+
+      $("#case_name").on("input", function() {
+          var input = this.value;
+          if (input != "")
+              $("#submit-button").css("visibility","visible");
+          else 
+              $("#submit-button").css("visibility","hidden");
+      });
+
       $(document).ready(function() {
           var table = $('#example').DataTable();
       });
