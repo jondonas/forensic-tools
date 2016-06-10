@@ -4,12 +4,14 @@ html
     link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
     link(rel="stylesheet", href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css")
     link(rel="stylesheet", href="http://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
     script(src="http://cdn.datatables.net/1.10.12/js/jquery.dataTables.js")
     script(src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js")
     // script(src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
     script(src="https://www.gstatic.com/charts/loader.js")
     script(src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js")
     style.
       .divSquare{
           width:50%; float: left
@@ -218,7 +220,6 @@ html
       h3
         span(style="vertical-align:middle;")
           | ClamAV Flagged Files&nbsp&nbsp&nbsp
-          img(src='/components/scan-interface/static/clam.png' height='25' style="bottom: 2px; position:relative;")
         // ClamAV Flagged Files
       hr
       div(style="margin:auto; width: 90%;")
@@ -270,7 +271,6 @@ html
       h3
         span(style="vertical-align:middle;")
           | VirusTotal > 5% Detection&nbsp&nbsp&nbsp
-          img(src='/components/scan-interface/static/virus.png' height='25' style="bottom: 2px; position:relative;")
         hr
       div(style="margin:auto; width: 90%;")
         table(id="vtotal" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
@@ -321,8 +321,43 @@ html
                       b Yara Flag: &nbsp
                       | #{result.yaramalwareflag}
                 td #{result.filetype}
+      br
+      br
+      h3
+        span(style="vertical-align:middle;")
+          | Chrome History&nbsp&nbsp&nbsp
+        hr
+      div(id="visualization")
+
     script.
       $(document).ready(function() {
           var table1 = $('#clamav').DataTable();
           var table2 = $('#vtotal').DataTable();
       });
+
+      var container = document.getElementById('visualization');
+
+      var groups = new vis.DataSet([
+        {id: 1, content: 'URLs', value: 1},
+        {id: 2, content: 'Downloads', value: 2}
+      ]);
+
+      //var items = new vis.DataSet(!{JSON.stringify(history)});
+
+      var items = new vis.DataSet([
+        {group: 1, content: '1', title: 'test1', start: '2016-05-01'},
+        {group: 1, content: '2', title: 'test1', start: '2016-05-02'},
+        {group: 1, content: '3', title: 'test1', start: '2016-05-03'},
+        {group: 2, content: '4', title: 'test1', start: '2016-05-04'},
+        {group: 2, content: '5', title: 'test1', start: '2016-05-05'},
+        {group: 2, content: '6', title: 'test1', start: '2016-05-06'}
+      ]);
+
+      var options = {
+          //height: 200,
+          //stack: false,
+          type: 'point',
+          zoomMin: 2000,
+          zoomMax: 5184000000};
+
+      var timeline = new vis.Timeline(container, items, groups, options);

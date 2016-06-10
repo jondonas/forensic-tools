@@ -75,6 +75,8 @@ app.get('/cases/:case', function (req, res) {
        {"stagename": "wildfire"}, {"stagename": "clamav"}]
     var results = [];
     var stage_results = [];
+    var history = [];
+
     var finished = _.after(1, doRender);
     var clam_detections;
     var vtotal_detections;
@@ -86,7 +88,7 @@ app.get('/cases/:case', function (req, res) {
         var finInfo = _.after(search.length+stages.length+2, doClose);
         var collection = db.collection('files');
 
-        // gets info
+        // gets count info
         search.forEach(function (value, i) {
             collection.count(value, function (err, num) {
                 results.push({index: i, result: num});
@@ -94,6 +96,7 @@ app.get('/cases/:case', function (req, res) {
             });
         });
 
+        // gets entry info for clamav
         collection.find({"clamavmalware": true, nsrl:false}).toArray(function(err, docs) {
             clam_detections = docs;
             for (var i = 0; i < clam_detections.length; ++i) {
@@ -103,6 +106,7 @@ app.get('/cases/:case', function (req, res) {
             finInfo();
         });
 
+        // gets entry info for vtotal
         collection.find({"virustotalpercentage":{"$gt": 5}}).toArray(function(err, docs) {
             vtotal_detections = docs;
             for (var i = 0; i < vtotal_detections.length; ++i) {
@@ -112,8 +116,8 @@ app.get('/cases/:case', function (req, res) {
             finInfo();
         });
 
+        // gets completed stages
         var collection2 = db.collection('stages');
-
         stages.forEach(function (value, i) {
             collection2.count(value, function (err, num) {
                 stage_results[value["stagename"]] = num;
@@ -121,6 +125,29 @@ app.get('/cases/:case', function (req, res) {
             });
         });
 
+/*        var dates = []
+        var date = new Date();
+        var day = date.getDate();
+        var month = date.getMonth();
+        var start_day = day;
+
+        // gets chrome history data
+        var collection3 = db.collection('urlhistory');
+        collection3.find({download:{$exists: false}}).toArray(function(err, docs) {
+            for (var i = 0; i < docs.length; ++i) {
+                history.push({group: 1, content: '&zwnj;', start: docs[i]["visittime"]});
+            }
+            finInfo();
+        });
+
+        collection3.find({download:{$exists: true}}).toArray(function(err, docs) {
+            for (var i = 0; i < docs.length; ++i) {
+                history.push({group: 2, content: '&zwnj;', start: docs[i]["visittime"]});
+            }
+            finInfo();
+        }); */
+
+        // function to call when all mongo calls are complete
         function doClose() {
             db.close();
             finished();
@@ -175,7 +202,7 @@ app.get('/cases/:case', function (req, res) {
         }
 
         res.render("/home/jdonas/web-interface/components/scan-interface/views/results", 
-          { percent: percent, progress: progress, tot_files: results[13].result, case_name: case_name, status: status, clam_detections: clam_detections, vtotal_detections: vtotal_detections,
+          { percent: percent, progress: progress, tot_files: results[13].result, case_name: case_name, status: status, clam_detections: clam_detections, vtotal_detections: vtotal_detections, history: history,
             vtotal_null: results[0].result, vtotal_0: results[1].result, vtotal_gt5: results[2].result, vtotal_gt10: results[3].result,
             nsrl_null: results[4].result, nsrl_true: results[5].result, nsrl_false: results[6].result,
             clamav_null: results[7].result, clamav_true: results[8].result, clamav_false: results[9].result,
