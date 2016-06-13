@@ -8,6 +8,7 @@ var _ = require("underscore");
 var exec = require('child_process').exec;
 var MongoClient = require('mongodb').MongoClient;
 var favicon = require('serve-favicon');
+var path = require('path'), fs=require('fs');
 //var dns = require('dns');
 
 app.use(bodyParser.json()); // support json encoded bodies
@@ -46,9 +47,34 @@ app.get('/forensic-cases', function (req, res) {
             res.send("Oops! We seem to have run into an error: " + err);
         }
         else {
+
+            function fromDir(found, startPath,filter){
+                if (!fs.existsSync(startPath)){
+                    return;
+                }
+                var files = fs.readdirSync(startPath);
+                for(var i = 0; i < files.length; ++i) {
+                    var filename = path.join(startPath,files[i]);
+                    var stat = fs.lstatSync(filename);
+                    if (stat.isDirectory()) {
+                        fromDir(found,filename,filter);
+                    }
+                    else {
+                        for (var x = 0; x < filter.length; ++x) {
+                            if (filename.indexOf(filter[x]) >= 0) {
+                                found.push(filename);
+                            }
+                        }
+                    };
+                };
+            };
+
+            var found = [];
+            fromDir(found, '/mnt', ['.001', '.dd']);
+
             var collection = db.collection('cases');
             collection.find({}).toArray(function(err, docs) {
-                res.render("/home/jdonas/web-interface/components/scan-interface/views/index", { cases : docs });
+                res.render("/home/jdonas/web-interface/components/scan-interface/views/index", { cases : docs, files: found });
             db.close();
             });
         }
