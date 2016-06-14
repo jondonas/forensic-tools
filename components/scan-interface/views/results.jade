@@ -22,11 +22,15 @@ html
       google.charts.setOnLoadCallback(drawChart);
 
       function drawChart() {
+            var clamav_pending = #{nsrl_false+clamav_null};
+            if (clamav_pending < 0)
+                clamav_pending = 0;
+
             var data = google.visualization.arrayToDataTable([
               ['Scanner', 'Scanned', 'Pending', 'Not Being Scanned'],
               ['NSRL', #{tot_files-nsrl_null}, #{nsrl_null}, 0],
               ['VirusTotal', #{vtotal_ne_null}, #{vtotal_pending}, #{tot_files-vtotal_ne_null-vtotal_pending}],
-              ['ClamAV', #{tot_files-clamav_null}, #{clamav_null}, 0],
+              ['ClamAV', #{tot_files-clamav_null}, clamav_pending, #{nsrl_true}],
               ['Wildfire', #{tot_files-wfire_null}, 0, #{wfire_null}]
             ]);
 
@@ -48,8 +52,8 @@ html
             var data4 = google.visualization.arrayToDataTable([
               ['Status', 'Count'],
               ['Not Flagged', #{clamav_false}],
-              ['Flagged', #{clamav_true}],
-              ['Pending', #{clamav_null}]
+              ['Pending', #{clamav_null}],
+              ['Flagged', #{clamav_true}]
             ]);
 
             var data5;
@@ -136,8 +140,8 @@ html
             var options4 = {
               slices: {
                 0: { color: '#00b300' },
-                1: { color: 'red', offset: offset4 },
-                2: { color: '#cc00cc' }
+                1: { color: '#cc00cc' },
+                2: { color: 'red', offset: offset4 }
               },
               title: 'ClamAV',
               sliceVisibilityThreshold: 0,

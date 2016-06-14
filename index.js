@@ -40,6 +40,38 @@ app.get('/cases', function (req, res) {
 ////////////////////////////////////////////
 
 
+app.post('/test', function (req, res) {
+    var dir = req.body.dir;
+    var ext = ['.001', '.dd'];
+
+    var r = '<ul class="jqueryFileTree" style="display: none;">';
+    try {
+        r = '<ul class="jqueryFileTree" style="display: none;">';
+        var files = fs.readdirSync(dir);
+        files.forEach(function(f){
+            var ff = dir + f;
+            var stats = fs.statSync(ff)
+            if (stats.isDirectory()) {
+                r += '<li class="directory collapsed"><a href="#" rel="' + ff  + '/">' + f + '</a></li>'; 
+            } 
+            else {
+                for (var x = 0; x < ext.length; ++x) {
+                    if (f.indexOf(ext[x]) >= 0) {
+                        var e = f.split('.')[1];
+                        r += '<li class="file ext_' + e + '"><a href="#" rel='+ ff + '>' + f + '</a></li>';
+                    }
+                }
+            }
+        });
+        r += '</ul>';
+    } catch(e) {
+        r += 'Could not load directory: ' + dir;
+        r += '</ul>';
+    }
+    res.send(r)
+});
+
+
 app.get('/forensic-cases', function (req, res) {
     var url = "mongodb://jdonas:NCIR4525@192.168.0.113/paladion-cases";
     MongoClient.connect(url, function(err, db) {
@@ -47,7 +79,8 @@ app.get('/forensic-cases', function (req, res) {
             res.send("Oops! We seem to have run into an error: " + err);
         }
         else {
-
+            
+            // gets a list of all disk images in /mnt directory
             function fromDir(found, startPath,filter){
                 if (!fs.existsSync(startPath)){
                     return;
@@ -62,7 +95,7 @@ app.get('/forensic-cases', function (req, res) {
                     else {
                         for (var x = 0; x < filter.length; ++x) {
                             if (filename.indexOf(filter[x]) >= 0) {
-                                found.push(filename);
+                                found.push([filename]);
                             }
                         }
                     };
@@ -71,6 +104,15 @@ app.get('/forensic-cases', function (req, res) {
 
             var found = [];
             fromDir(found, '/mnt', ['.001', '.dd']);
+            for (var i = 0; i < found.length; ++i) {
+                var splitpath = found[i][0].split('/');
+                splitpath.shift();
+                splitpath.shift();
+                found[i][0] = '/' + splitpath.join('/');
+                found[i][2] = splitpath[splitpath.length-1];
+                splitpath.pop();
+                found[i][1] = '/' + splitpath.join('/') + '/';
+            }
 
             var collection = db.collection('cases');
             collection.find({}).toArray(function(err, docs) {
@@ -78,6 +120,40 @@ app.get('/forensic-cases', function (req, res) {
             db.close();
             });
         }
+    });
+});
+
+
+////////////////////////////////////////////
+
+// view to start a scan for a disk image
+app.post('/start-scan', function(req, res) {
+    var name = req.body.case1.replace(/\s/g,'');
+    var diskimage = req.body.diskimage;
+    
+    var url = "mongodb://jdonas:NCIR4525@192.168.0.113/paladion-cases?authSource=admin";
+    MongoClient.connect(url, function(err, db) {
+        var collection = db.collection('cases');
+        
+        collection.count({ "case": name}, function (err, num) {
+            if (num >= 1)
+                res.send("Exists");
+            else {
+                collection.insertOne( {
+                    "case": name,
+                    "diskimage": diskimage
+                }, function (err, result) {
+                    if (err) {
+                        res.send(err);
+                        console.log(err);
+                    }
+                    else {
+                        db.close();
+                        res.send("Success");
+                    }
+                });
+            }
+        });
     });
 });
 
