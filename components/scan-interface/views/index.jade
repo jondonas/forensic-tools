@@ -102,12 +102,12 @@ html
               $("#submit-button").prop('disabled', true);
           }
           else if (input.indexOf(' ') >= 0) {
-              $("#submit-button").css("cursor", "cursor");
+              $("#submit-button").css("cursor", "default");
               $("#submit-button").prop('disabled', true);
               $("#submit-button").html('Please Remove Whitespace');
           }
           else {
-              $("#submit-button").css("cursor", "cursor");
+              $("#submit-button").css("cursor", "pointer");
               $("#submit-button").prop('disabled', false);
               $("#submit-button").html('Start Analysis &#8658');
           }

@@ -39,37 +39,42 @@ app.get('/cases', function (req, res) {
 
 ////////////////////////////////////////////
 
-
+// gets a list of all disk images in /mnt directory for file viewer
 app.post('/test', function (req, res) {
     var dir = req.body.dir;
     var ext = ['.001', '.dd'];
 
-    var r = '<ul class="jqueryFileTree" style="display: none;">';
+    var html = '<ul class="jqueryFileTree" style="display: none;">';
     try {
-        r = '<ul class="jqueryFileTree" style="display: none;">';
+        html = '<ul class="jqueryFileTree" style="display: none;">';
         var files = fs.readdirSync(dir);
-        files.forEach(function(f){
-            var ff = dir + f;
-            var stats = fs.statSync(ff)
+        files.forEach(function(file){
+            var path = dir + file;
+            var stats = fs.statSync(path)
             if (stats.isDirectory()) {
-                r += '<li class="directory collapsed"><a href="#" rel="' + ff  + '/">' + f + '</a></li>'; 
+                html += '<li class="directory collapsed"><a href="#" rel="' + path  + '/">' + file + '</a></li>'; 
             } 
             else {
                 for (var x = 0; x < ext.length; ++x) {
-                    if (f.indexOf(ext[x]) >= 0) {
-                        var e = f.split('.')[1];
-                        r += '<li class="file ext_' + e + '"><a href="#" rel='+ ff + '>' + f + '</a></li>';
+                    if (file.indexOf(ext[x]) >= 0) {
+                        var extension = file.split('.')[1];
+                        html += '<li class="file ext_' + extension + '"><a href="#" rel='+ path + '>' + file + '</a></li>';
                     }
                 }
             }
         });
-        r += '</ul>';
-    } catch(e) {
-        r += 'Could not load directory: ' + dir;
-        r += '</ul>';
+        html += '</ul>';
+    } 
+    catch(e) {
+        html += '<i>Could not load directory</i>';
+        html += '</ul>';
     }
-    res.send(r)
+
+    res.send(html)
 });
+
+
+////////////////////////////////////////////
 
 
 app.get('/forensic-cases', function (req, res) {
@@ -80,43 +85,9 @@ app.get('/forensic-cases', function (req, res) {
         }
         else {
             
-            // gets a list of all disk images in /mnt directory
-            function fromDir(found, startPath,filter){
-                if (!fs.existsSync(startPath)){
-                    return;
-                }
-                var files = fs.readdirSync(startPath);
-                for(var i = 0; i < files.length; ++i) {
-                    var filename = path.join(startPath,files[i]);
-                    var stat = fs.lstatSync(filename);
-                    if (stat.isDirectory()) {
-                        fromDir(found,filename,filter);
-                    }
-                    else {
-                        for (var x = 0; x < filter.length; ++x) {
-                            if (filename.indexOf(filter[x]) >= 0) {
-                                found.push([filename]);
-                            }
-                        }
-                    };
-                };
-            };
-
-            var found = [];
-            fromDir(found, '/mnt', ['.001', '.dd']);
-            for (var i = 0; i < found.length; ++i) {
-                var splitpath = found[i][0].split('/');
-                splitpath.shift();
-                splitpath.shift();
-                found[i][0] = '/' + splitpath.join('/');
-                found[i][2] = splitpath[splitpath.length-1];
-                splitpath.pop();
-                found[i][1] = '/' + splitpath.join('/') + '/';
-            }
-
             var collection = db.collection('cases');
             collection.find({}).toArray(function(err, docs) {
-                res.render("/home/jdonas/web-interface/components/scan-interface/views/index", { cases : docs, files: found });
+                res.render("/home/jdonas/web-interface/components/scan-interface/views/index", { cases : docs,});
             db.close();
             });
         }
@@ -177,7 +148,6 @@ app.get('/cases/:case', function (req, res) {
        {"stagename": "wildfire"}, {"stagename": "clamav"}]
     var results = [];
     var stage_results = [];
-    var history = [];
 
     var finished = _.after(1, doRender);
     var clam_detections;
@@ -256,22 +226,52 @@ app.get('/cases/:case', function (req, res) {
         }
     });
 
-    // used to sort the results list
-    function compare(a, b) {
-      if (a.index < b.index)
-        return -1;
-      else (a.index > b.index)
-        return 1;
-    }
-    
     // calculates statistics and renders page
     function doRender() {
-        results.sort(compare);
-        var left = results[4].result + results[7].result + results[14].result;
-        var tot = results[13].result*2 + results[14].result + results[15].result;
-        var percent = Math.floor(((tot - left)/tot)*100);
-        var status;
 
+        var acm_times = [];
+        
+        // parses date format for timeline vis
+        function getTime(time) {
+            time = time.toString().split(' ');
+            var month = new Date(Date.parse(time[1] +" 1, 2000")).getMonth()+1
+            var hms = time[4].split(':');
+            var new_time = time[3] + '-' +  ("00" + month).slice(-2) + '-' + time[2] + 'T' + hms[0] + ':' + hms[1] + ':' + hms[2] + '.000Z';
+            return new_time;
+        }
+
+        // retrieves relevant times for timeline vis
+        function acmTimes(in_arr, res_arr) {
+            for (var i = 0; i < in_arr.length; ++i) {
+                res_arr.push({group: 1, content: in_arr[i]["filename"], start: getTime(in_arr[i]["atime"])});
+                res_arr.push({group: 2, content: in_arr[i]["filename"], start: getTime(in_arr[i]["ctime"])});
+                res_arr.push({group: 3, content: in_arr[i]["filename"], start: getTime(in_arr[i]["mtime"])});
+            }
+        }
+        
+        if (!(clam_detections.length + vtotal_detections.length > 50)) {
+            acmTimes(clam_detections, acm_times);
+            acmTimes(vtotal_detections, acm_times);
+        }
+
+        // used to sort the results list
+        function compare(a, b) {
+          if (a.index < b.index)
+            return -1;
+          else (a.index > b.index)
+            return 1;
+        }
+
+        // prepares statistics
+        results.sort(compare);
+        var left = results[4].result + results[14].result + results[6].result - results[13].result + results[7].result;
+        var tot = results[13].result + results[14].result + results[15].result + results[6].result;
+        var percent = Math.floor(((tot - left)/tot)*100);
+
+        if (percent > 100)
+            percent = 100;
+
+        var status;
         var progress;
         if (results[5].result == 0 && results[6].result == 0) {
             progress = "progress-bar-striped progress-bar-warning active";
@@ -304,7 +304,7 @@ app.get('/cases/:case', function (req, res) {
         }
 
         res.render("/home/jdonas/web-interface/components/scan-interface/views/results", 
-          { percent: percent, progress: progress, tot_files: results[13].result, case_name: case_name, status: status, clam_detections: clam_detections, vtotal_detections: vtotal_detections, history: history,
+          { percent: percent, progress: progress, tot_files: results[13].result, case_name: case_name, status: status, clam_detections: clam_detections, vtotal_detections: vtotal_detections, acm_times: acm_times,
             vtotal_null: results[0].result, vtotal_0: results[1].result, vtotal_gt5: results[2].result, vtotal_gt10: results[3].result,
             nsrl_null: results[4].result, nsrl_true: results[5].result, nsrl_false: results[6].result,
             clamav_null: results[7].result, clamav_true: results[8].result, clamav_false: results[9].result,

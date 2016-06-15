@@ -1,7 +1,7 @@
 doctype
 html
   head
-    // meta(http-equiv="refresh" content="30")
+    // meta(http-equiv="refresh" content="60")
     link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
     link(rel="stylesheet", href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css")
     link(rel="stylesheet", href="http://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css")
@@ -22,7 +22,7 @@ html
       google.charts.setOnLoadCallback(drawChart);
 
       function drawChart() {
-            var clamav_pending = #{nsrl_false+clamav_null};
+            var clamav_pending = #{nsrl_false-tot_files+clamav_null};
             if (clamav_pending < 0)
                 clamav_pending = 0;
 
@@ -204,7 +204,7 @@ html
         span(style="display:inline-block; width:100px;")
           button(type="button" style="padding:2px;" class="btn btn-default" onclick="refresh()")
             | &#8635 Refresh
-    //  hr
+
     div(style="width:800px; margin:auto;")
       div(class="divSquare")
         div(id="piechart1")
@@ -225,7 +225,7 @@ html
       h3
         span(style="vertical-align:middle;")
           | ClamAV Flagged Files&nbsp&nbsp&nbsp
-        // ClamAV Flagged Files
+
       hr
       div(style="margin:auto; width: 90%;")
         table(id="clamav" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
@@ -326,12 +326,27 @@ html
                       b Yara Flag: &nbsp
                       | #{result.yaramalwareflag}
                 td #{result.filetype}
-    //-
       br
       br
-      h3
-        span(style="vertical-align:middle;")
-          | Chrome History&nbsp&nbsp&nbsp
+
+      div
+        h3
+          span(style="display:inline-block; width:50%;")
+            | Detected File Timeline
+          span(style="display:inline-block; width:50%; text-align:right;")
+            form
+              span(style="display:inline-block; width:110px;")
+                input(type="radio" name="acmTime" id="aTime" onclick="setGroup1()" checked)
+                label(for="aTime" style="padding:5px; padding-left:40px;") 
+                  | aTime
+              span(style="display:inline-block; width:110px;")
+                input(type="radio" name="acmTime" id="cTime" onclick="setGroup2()")
+                label(for="cTime" style="padding:5px; padding-left:40px;")  
+                  | cTime
+              span(style="display:inline-block; width:110px;")
+                input(type="radio" name="acmTime" id="mTime" onclick="setGroup3()")
+                label(for="mTime" style="padding:5px; padding-left:40px;") 
+                  | mTime
         hr
       div(id="visualization")
 
@@ -341,30 +356,41 @@ html
           var table2 = $('#vtotal').DataTable();
       });
 
-    //-
       var container = document.getElementById('visualization');
 
-      var groups = new vis.DataSet([
-        {id: 1, content: 'URLs', value: 1},
-        {id: 2, content: 'Downloads', value: 2}
+      var group1 = new vis.DataSet([
+        {id: 1, content: 'aTime', value: 1}
       ]);
 
-      //var items = new vis.DataSet(!{JSON.stringify(history)});
-
-      var items = new vis.DataSet([
-        {group: 1, content: '1', title: 'test1', start: '2016-05-01'},
-        {group: 1, content: '2', title: 'test1', start: '2016-05-02'},
-        {group: 1, content: '3', title: 'test1', start: '2016-05-03'},
-        {group: 2, content: '4', title: 'test1', start: '2016-05-04'},
-        {group: 2, content: '5', title: 'test1', start: '2016-05-05'},
-        {group: 2, content: '6', title: 'test1', start: '2016-05-06'}
+      var group2 = new vis.DataSet([
+        {id: 2, content: 'cTime', value: 2}
       ]);
+
+      var group3 = new vis.DataSet([
+        {id: 3, content: 'mTime', value: 3}
+      ]);
+
+      function setGroup1() {
+          timeline.setGroups(group1);
+      }
+
+      function setGroup2() {
+          timeline.setGroups(group2);
+      }
+
+      function setGroup3() {
+          timeline.setGroups(group3);
+      }
+
+      var items = new vis.DataSet(!{JSON.stringify(acm_times)});
 
       var options = {
-          //height: 200,
-          //stack: false,
+          maxHeight: 500,
+          minHeight: 300,
           type: 'point',
-          zoomMin: 2000,
-          zoomMax: 5184000000};
+          zoomMax: 631139040000,
+          zoomMin: 2000};
 
-      var timeline = new vis.Timeline(container, items, groups, options);
+      var timeline = new vis.Timeline(container, items, options);
+
+      timeline.setGroups(group1);
