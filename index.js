@@ -106,6 +106,7 @@ app.post('/start-scan', function(req, res) {
     MongoClient.connect(url, function(err, db) {
         var collection = db.collection('cases');
         
+        // does a check to see if casename already exists
         collection.count({ "case": name}, function (err, num) {
             if (num >= 1)
                 res.send("Exists");
@@ -132,6 +133,7 @@ app.post('/start-scan', function(req, res) {
 ////////////////////////////////////////////
 
 
+// retrieves and displays case info from mongodb
 app.get('/cases/:case', function (req, res) {
     var search = 
       [{"virustotalpercentage": null}, {"virustotalpercentage": 0}, 
@@ -243,9 +245,25 @@ app.get('/cases/:case', function (req, res) {
         // retrieves relevant times for timeline vis
         function acmTimes(in_arr, res_arr) {
             for (var i = 0; i < in_arr.length; ++i) {
-                res_arr.push({group: 1, content: in_arr[i]["filename"], start: getTime(in_arr[i]["atime"])});
-                res_arr.push({group: 2, content: in_arr[i]["filename"], start: getTime(in_arr[i]["ctime"])});
-                res_arr.push({group: 3, content: in_arr[i]["filename"], start: getTime(in_arr[i]["mtime"])});
+                var start1, start2, start3;
+                
+                if (in_arr[i]["atime"])
+                    start1 = getTime(in_arr[i]["atime"]);
+                else
+                    start1 = "error";
+                res_arr.push({group: 1, content: in_arr[i]["filename"], start: start1 });
+
+                if (in_arr[i]["ctime"])
+                    start2 = getTime(in_arr[i]["ctime"]);
+                else
+                    start2 = "error";
+                res_arr.push({group: 2, content: in_arr[i]["filename"], start: start2 });
+
+                if (in_arr[i]["mtime"])
+                    start3 = getTime(in_arr[i]["mtime"]);
+                else
+                    start4 = "error";
+                res_arr.push({group: 3, content: in_arr[i]["filename"], start: start3 });
             }
         }
         

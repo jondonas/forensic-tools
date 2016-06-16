@@ -1,18 +1,29 @@
 doctype
 html
   head
-    // meta(http-equiv="refresh" content="60")
-    link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
-    link(rel="stylesheet", href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css")
-    link(rel="stylesheet", href="http://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css")
-    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css")
-    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
-    script(src="http://cdn.datatables.net/1.10.12/js/jquery.dataTables.js")
-    script(src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js")
+    // meta(http-equiv="refresh" content="30")
+    link(rel="stylesheet", href="/components/scan-interface/static/css/bootstrap.min.css")
+    // link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
+    link(rel="stylesheet", href="/components/scan-interface/static/css/jquery.mobile-1.4.5.min.css")
+    // link(rel="stylesheet", href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css")
+    link(rel="stylesheet", href="/components/scan-interface/static/css/dataTables.bootstrap.min.css")
+    // link(rel="stylesheet", href="http://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css")
+    link(rel="stylesheet", href="/components/scan-interface/static/css/vis.min.css")
+    // link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css")
+
+    script(src="/components/scan-interface/static/js/jquery.min.js")
+    // script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
+    script(src="/components/scan-interface/static/js/jquery.dataTables.js")
+    // script(src="http://cdn.datatables.net/1.10.12/js/jquery.dataTables.js")
+    script(src="/components/scan-interface/static/js/dataTables.bootstrap.min.js")
+    // script(src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js")
     // script(src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
-    script(src="https://www.gstatic.com/charts/loader.js")
-    script(src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js")
-    script(src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js")
+    script(src="/components/scan-interface/static/js/loader.js")
+    // script(src="https://www.gstatic.com/charts/loader.js")
+    script(src="/components/scan-interface/static/js/jquery.mobile-1.4.5.min.js")
+    // script(src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js")
+    script(src="/components/scan-interface/static/js/vis.min.js")
+    // script(src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js")
     style.
       .divSquare{
           width:50%; float: left
@@ -25,6 +36,15 @@ html
             var clamav_pending = #{nsrl_false-tot_files+clamav_null};
             if (clamav_pending < 0)
                 clamav_pending = 0;
+            var start_nsrl = #{nsrl_null}, start_vtotal = #{vtotal_pending}, start_clamav = clamav_pending, start_wfire = #{tot_files};
+            if (start_nsrl == 0) 
+                start_nsrl = 1;
+            if (start_vtotal == 0)
+                start_vtotal = 1;
+            if (start_clamav == 0)
+                start_clamav = 1;
+            if (start_wfire == 0)
+                start_wfire = 1;
 
             var data = google.visualization.arrayToDataTable([
               ['Scanner', 'Scanned', 'Pending', 'Not Being Scanned'],
@@ -38,21 +58,21 @@ html
               ['Status', 'Count'],
               ['Known', #{nsrl_true}],
               ['Unknown', #{nsrl_false}],
-              ['Pending', #{nsrl_null}]
+              ['Pending', start_nsrl]
             ]);
 
             var data3 = google.visualization.arrayToDataTable([
               ['Status', 'Count'],
               ['VTotal Known', #{vtotal_0}],
               ['Not EXE/DLL', #{vtotal_neutral}],
-              ['Pending', #{vtotal_pending}],
+              ['Pending', start_vtotal],
               ['> 5% Detection', #{vtotal_gt5}]
             ]);
 
             var data4 = google.visualization.arrayToDataTable([
               ['Status', 'Count'],
               ['Not Flagged', #{clamav_false}],
-              ['Pending', #{clamav_null}],
+              ['Pending', start_clamav],
               ['Flagged', #{clamav_true}]
             ]);
 
@@ -61,7 +81,7 @@ html
             if (#{wfire_null} == #{tot_files}) {
                 data5 = google.visualization.arrayToDataTable([
                   ['Status', 'Count'],
-                  ['No Scans Completed', #{tot_files}]
+                  ['No Scans Completed', start_wfire]
                 ]);
                 sliceoption = {
                     0: { color: '#BDBDBD' }
@@ -79,13 +99,17 @@ html
                 };
             }
 
+            var start_total = #{tot_files};
+            if (start_total == 0)
+                start_total = 1;
+
             var options = {
               title: 'Individual Scan Progress',
               chartArea: {width: '70%'},
               isStacked: true,
               hAxis: {
                 title: 'File Count (#{tot_files} Total)',
-                viewWindow: { max: #{tot_files} },
+                viewWindow: { max: start_total },
                 minValue: 0
               },
               vAxis: {
@@ -143,7 +167,7 @@ html
                 1: { color: '#cc00cc' },
                 2: { color: 'red', offset: offset4 }
               },
-              title: 'ClamAV',
+              title: 'ClamAV (Excludes NSRL Known)',
               sliceVisibilityThreshold: 0,
               is3D: true,
               pieSliceText: 'value',
