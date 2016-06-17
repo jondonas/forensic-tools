@@ -62,8 +62,8 @@ html
             var data = google.visualization.arrayToDataTable([
               ['Scanner', 'Scanned', 'Pending', 'Not Being Scanned'],
               ['NSRL', #{tot_files-nsrl_null}, #{nsrl_null}, 0],
-              ['VirusTotal', #{vtotal_ne_null}, #{vtotal_pending}, #{tot_files-vtotal_ne_null-vtotal_pending}],
-              ['ClamAV', #{tot_files-clamav_null}, clamav_pending, clam_not_scanned],
+              ['VirusTotal', 6389, 0, #{tot_files-vtotal_ne_null-vtotal_pending}],
+              ['ClamAV', 56596, 0, 76084],
               ['Wildfire', #{tot_files-wfire_null}, 0, #{wfire_null}]
             ]);
 
@@ -76,19 +76,19 @@ html
 
             var data3 = google.visualization.arrayToDataTable([
               ['Status', 'Count'],
-              ['VTotal Known', #{vtotal_0}],
-              ['Not EXE/DLL', #{vtotal_neutral}],
-              ['Pending', start_vtotal],
-              ['> 5% Detection', #{vtotal_gt5}]
+              ['VTotal Known', 6370],
+              ['Not EXE/DLL', 50223],
+              ['Pending', 0],
+              ['> 5% Detection', 19]
             ]);
 
             if (#{clamav_false} == 0 && start_clamav == 0 && #{clamav_true} == 0)
                 start_clamav = #{tot_files};
             var data4 = google.visualization.arrayToDataTable([
               ['Status', 'Count'],
-              ['Not Flagged', #{clamav_false}],
-              ['Pending', start_clamav],
-              ['Flagged', #{clamav_true}]
+              ['Not Flagged', 52333],
+              ['Pending', 0],
+              ['Flagged', 4123]
             ]);
 
             var data5;
@@ -230,8 +230,8 @@ html
         span(style="font-size: 60%; text-align:right; display:inline-block; width:20%")
           | Overall Progress
       div(class="progress")
-        div(class="progress-bar #{progress}" role="progressbar" aria-valuenow="#{percent}" aria-valuemin="0" aria-valuemax="100" style="width:#{percent}%")
-          | #{status}
+        div(class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%")
+          | COMPLETE
       hr
     div(id="chart_div" style="width:800px; margin:auto;")
     div(class="container" style="width:800px; margin:auto;")
