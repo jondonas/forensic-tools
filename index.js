@@ -1,5 +1,4 @@
 var express = require('express');
-var app = express();
 var bodyParser = require('body-parser');
 var execSync = require('exec-sync');
 var session = require('express-session');
@@ -10,6 +9,8 @@ var MongoClient = require('mongodb').MongoClient;
 var favicon = require('serve-favicon');
 var path = require('path'), fs=require('fs');
 //var dns = require('dns');
+
+var app = express();
 
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
@@ -39,8 +40,9 @@ app.get('/cases', function (req, res) {
 
 ////////////////////////////////////////////
 
+
 // gets a list of all disk images in /mnt directory for file viewer
-app.post('/test', function (req, res) {
+app.post('/directory', function (req, res) {
     var dir = req.body.dir;
     var ext = ['.001', '.dd'];
 
@@ -97,6 +99,7 @@ app.get('/forensic-cases', function (req, res) {
 
 ////////////////////////////////////////////
 
+
 // view to start a scan for a disk image
 app.post('/start-scan', function(req, res) {
     var name = req.body.case1.replace(/\s/g,'');
@@ -117,7 +120,6 @@ app.post('/start-scan', function(req, res) {
                 }, function (err, result) {
                     if (err) {
                         res.send(err);
-                        console.log(err);
                     }
                     else {
                         db.close();
@@ -129,6 +131,56 @@ app.post('/start-scan', function(req, res) {
     });
 });
 
+
+////////////////////////////////////////////
+
+// Updates mongo to restart certain aspects of scan
+app.post('/scan-control', function(req, res) {
+    var case_name = req.body.case1;
+    var redo = req.body.redo;
+    var finished = _.after(redo.length+1, response);
+
+    // updates paladion-cases
+    var url = "mongodb://jdonas:NCIR4525@192.168.0.113/paladion-cases?authSource=admin";
+    MongoClient.connect(url, function(err, db) {
+        if (err)
+            res.send(err);
+        
+        var collection = db.collection('cases'); 
+        
+        collection.updateOne({"case" : case_name}, {$set: {"analyzed": null }}, function (err, results) {
+            db.close();
+            finished();
+        });
+    });
+
+    // updates specific case database
+    url = "mongodb://jdonas:NCIR4525@192.168.0.113/" + case_name +"?authSource=admin";
+    MongoClient.connect(url, function(err, db) {
+        if (err)
+            res.send(err);
+
+        var close_count = _.after(redo.length, closeDB);
+        var collection = db.collection('stages');
+
+        for (var i = 0; i < redo.length; ++i) {
+            collection.deleteOne({"stagename": redo[i]}, function(err, results) {
+                close_count();
+                finished();
+            });
+        }
+
+        function closeDB() {
+            db.close();
+        }
+    });
+
+    function response() {
+        res.send("Success");
+    }
+
+});
+    
 
 ////////////////////////////////////////////
 
@@ -335,6 +387,7 @@ app.get('/cases/:case', function (req, res) {
 
 
 ////////////////////////////////////////////
+
 
 // home page for ip-checker module
 app.get('/ip-check', function (req, res) {

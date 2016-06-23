@@ -1,29 +1,23 @@
 doctype
 html
   head
-    meta(http-equiv="refresh" content="30")
-    // link(rel="stylesheet", href="/components/scan-interface/static/css/bootstrap.min.css")
+    // meta(http-equiv="refresh" content="30")
     link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
-    // link(rel="stylesheet", href="/components/scan-interface/static/css/jquery.mobile-1.4.5.min.css")
     link(rel="stylesheet", href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css")
-    // link(rel="stylesheet", href="/components/scan-interface/static/css/dataTables.bootstrap.min.css")
     link(rel="stylesheet", href="http://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css")
-    // link(rel="stylesheet", href="/components/scan-interface/static/css/vis.min.css")
     link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css")
+    link(rel="stylesheet", href="/components/scan-interface/static/remodal/remodal.css")
+    link(rel="stylesheet", href="/components/scan-interface/static/remodal/remodal-default-theme.css")
 
-    // script(src="/components/scan-interface/static/js/jquery.min.js")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
-    // script(src="/components/scan-interface/static/js/jquery.dataTables.js")
     script(src="http://cdn.datatables.net/1.10.12/js/jquery.dataTables.js")
-    // script(src="/components/scan-interface/static/js/dataTables.bootstrap.min.js")
     script(src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js")
     // script(src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
-    // script(src="/components/scan-interface/static/js/loader.js")
     script(src="https://www.gstatic.com/charts/loader.js")
-    // script(src="/components/scan-interface/static/js/jquery.mobile-1.4.5.min.js")
     script(src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js")
-    // script(src="/components/scan-interface/static/js/vis.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js")
+    script(src="/components/scan-interface/static/remodal/remodal.min.js")
+
     style.
       .divSquare{
           width:50%; float: left
@@ -265,7 +259,7 @@ html
 
       hr
       div(style="margin:auto; width: 90%;")
-        table(id="clamav" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
+        table(id="clamav_table" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
           thead
             tr
               th File Name
@@ -315,7 +309,7 @@ html
           | VirusTotal > 5% Detection&nbsp&nbsp&nbsp
         hr
       div(style="margin:auto; width: 90%;")
-        table(id="vtotal" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
+        table(id="vtotal_table" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%")
           thead
             tr
               th File Name
@@ -386,11 +380,76 @@ html
                   | mTime
         hr
       div(id="visualization")
+      br
+      br
+      br
+      div(data-role="collapsible")
+        h1
+          | Controls
+        div
+          h4
+            | Re-Scan:
+          form(role="form")
+            label(style="padding:5px; padding-left:40px;")
+              input(type="checkbox" id="fingerprinting")
+              | Fingerprinting
+            label(style="padding:5px; padding-left:40px;")
+              input(type="checkbox" id="nsrl")
+              | NSRL
+            label(style="padding:5px; padding-left:40px;")
+              input(type="checkbox" id="clamav")
+              | ClamAV
+            label(style="padding:5px; padding-left:40px;")
+              input(type="checkbox" id="yarascans")
+              | Yara
+            label(style="padding:5px; padding-left:40px;")
+              input(type="checkbox" id="chromeurlhistory")
+              | Chrome History
+            label(style="padding:5px; padding-left:40px;")
+              input(type="checkbox" id="virustotal")
+              | VirusTotal
+            label(style="padding:5px; padding-left:40px;")
+              input(type="checkbox" id="wildfire")
+              | WildFire
+            label(style="padding:5px; padding-left:40px;")
+              input(type="checkbox" id="registry")
+              | Registry
+            label(style="padding:5px; padding-left:40px;")
+              input(type="checkbox" id="tasks")
+              | Tasks
+          br
+          div(style="text-align:center;")
+             button(type="button" style="width:100%; padding:5px;" class="btn btn-success" onclick="redoIt()" data-role="none")
+               | Re-Scan
+
+    div(data-remodal-id="modal1")
+      h1
+        | Confirm Re-Scan
+      p
+        | The following components will be restarted:
+      p(id="compRestart" style="font-weight: bold;")
+        | PlaceHolder
+      br
+      button(data-remodal-action="cancel" class="remodal-cancel" data-role="none")
+        | Cancel
+      button(data-remodal-action="confirm" class="remodal-confirm" id="redo-confirm" data-role="none")
+        | Confirm
+    div(data-remodal-id="modal2")
+      h1
+        | Invalid
+      p
+        | Please select one or more options
+      br
+      button(data-remodal-action="confirm" class="remodal-confirm" data-role="none")
+        | OK
 
     script.
+      var inst_redo = $('[data-remodal-id=modal1]').remodal();
+      var inst_invalid = $('[data-remodal-id=modal2]').remodal();
+
       $(document).ready(function() {
-          var table1 = $('#clamav').DataTable();
-          var table2 = $('#vtotal').DataTable();
+          var table1 = $('#clamav_table').DataTable();
+          var table2 = $('#vtotal_table').DataTable();
       });
 
       var container = document.getElementById('visualization');
@@ -431,3 +490,34 @@ html
       var timeline = new vis.Timeline(container, items, options);
 
       timeline.setGroups(group1);
+
+      var form_sel = []
+      function redoIt() {
+          form_sel = [];
+          var form_options = ["fingerprinting", "nsrl", "clamav", "yarascans", "chromeurlhistory", "virustotal", "wildfire", "registry", "tasks"];
+          for (var i = 0; i < form_options.length; ++i) {
+              if ($("#"+form_options[i]).is(':checked'))
+                  form_sel.push(form_options[i]);
+          }
+
+          if (form_sel.length == 0)
+              inst_invalid.open();
+          else
+              if (form_sel.length == form_options.length)
+                  $('#compRestart').text("All Scans");
+              else
+                  $('#compRestart').text(form_sel.toString().replace(/,/g, " | "));
+              inst_redo.open();
+      }
+
+      $("#redo-confirm").click(function () {
+          $.post(
+             "/scan-control",
+             { case1: "#{case_name}", redo: form_sel },
+             function(data) {
+                 if (data != "Success")
+                     alert("ERROR: " + data)
+                 refresh();
+             }
+          );
+      });
