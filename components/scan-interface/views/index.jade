@@ -6,6 +6,7 @@ html
     link(rel="stylesheet", href="/components/scan-interface/static/remodal/remodal.css")
     link(rel="stylesheet", href="/components/scan-interface/static/remodal/remodal-default-theme.css")
     link(rel="stylesheet", href="/components/scan-interface/static/filetree/jqueryFileTree.css")
+    link(rel="stylesheet", href="/components/scan-interface/static/switch/css/bootstrap3/bootstrap-switch.min.css")
 
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
     script(src="http://cdn.datatables.net/1.10.12/js/jquery.dataTables.js")
@@ -13,41 +14,169 @@ html
     script(src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
     script(src="/components/scan-interface/static/remodal/remodal.min.js")
     script(src="/components/scan-interface/static/filetree/jqueryFileTree.js")
+    script(src="/components/scan-interface/static/switch/js/bootstrap-switch.min.js")
   body
     div(class="container")
       div(class="page-header" style="margin:15px;")
-        h1(align="center")
+        h1(align="center" style="padding-top:0px; margin-top:0px; padding-bottom:0px; margin-bottom:0px;")
           span(style="vertical-align:middle;")
             | Control Panel&nbsp&nbsp
             img(src='/components/scan-interface/static/img/control.png' height='33' style="bottom: 3px; position:relative;")
-    br
     
+    div(style="height:40px;" id="whitespace1")
     div(style="text-align:center;" class="dropdown")
-      button(class="btn btn-info dropdown-toggle" id="choose_button" type="button" data-toggle="dropdown")
+      button(class="btn btn-info dropdown-toggle" id="disk_button" type="button" data-toggle="dropdown")
         | Choose Disk Image&nbsp&nbsp
         span(class="caret")
-      ul(class="dropdown-menu" id="dropit" style="left:50%; right:auto; transform:translate(-50%, 0); max-height:500px; max-width:700px; overflow:auto; border-left: 10px solid #F1F1F1; border-right: 10px solid #F1F1F1; border-top: 0px solid white; border-bottom: 3px solid #F1F1F1; background-color: #F1F1F1;")
+      ul(class="dropdown-menu" id="dropit_disk" style="left:50%; right:auto; transform:translate(-50%, 0); max-height:500px; max-width:700px; overflow:auto; border-left: 10px solid #F1F1F1; border-right: 10px solid #F1F1F1; border-top: 0px solid white; border-bottom: 3px solid #F1F1F1; background-color: #F1F1F1;")
         h6(style="text-align:center;")
           b /mnt/
           hr(style="margin-top:3px; margin-bottom:0px;")
         div(class="example")
-          div(id="fileTreeDemo_1" class="demo")
+          div(id="fileTree_disk" class="demo")
     
-    div(style="height:5px;")
-    div(class="form-group" style="width:300px; margin:auto;")
-      input(type="text" class="form-control" id="case_name" placeholder="Enter Case Name" style="visibility:hidden;")
-    p(style="text-align:center; height:24px;" id="info_text")
+    div(style="height:10px;")
+
+    div(style="margin:auto; text-align:center; width:325px; border: 1px solid #D3D3D3; border-radius: 10px; display:none;" id="disk_options")
+      div(style="height:10px;")
+      div(style="text-align:center; display:inline-block;" class="dropdown")
+        button(class="btn btn-default dropdown-toggle" id="os_type" type="button" data-toggle="dropdown")
+          | OS Type&nbsp&nbsp
+          span(class="caret")
+        ul(class="dropdown-menu" id="dropit_os" style="left:50%; right:auto; transform:translate(-50%, 0); max-height:500px; max-width:700px; overflow:auto; border-left: 10px solid #F1F1F1; border-right: 10px solid #F1F1F1; border-top: 0px solid white; border-bottom: 3px solid #F1F1F1; background-color: #F1F1F1;")
+          li
+            a(href="#")
+              | VistaSP0x64
+          li
+            a(href="#")
+              | VistaSP0x86
+          li
+            a(href="#")
+              | VistaSP1x64
+          li
+            a(href="#")
+              | VistaSP1x86
+          li
+            a(href="#")
+              | VistaSP2x64
+          li
+            a(href="#")
+              | VistaSP2x86 
+          li
+            a(href="#")
+              | Win10x64
+          li
+            a(href="#")
+              | Win10x86
+          li
+            a(href="#")
+              | Win2003SP0x86
+          li
+            a(href="#")
+              | Win2003SP1x64
+          li
+            a(href="#")
+              | Win2003SP1x86
+          li
+            a(href="#")
+              | Win2003SP2x64
+          li
+            a(href="#")
+              | Win2003SP2x86
+          li
+            a(href="#")
+              | Win2008R2SP0x64
+          li
+            a(href="#")
+              | Win2008R2SP1x64
+          li
+            a(href="#")
+              | Win2008SP1x64
+          li
+            a(href="#")
+              | Win2008SP1x86
+          li
+            a(href="#")
+              | Win2008SP2x64
+          li
+            a(href="#")
+              | Win2008SP2x86
+          li
+            a(href="#")
+              | Win2012R2x64
+          li
+            a(href="#")
+              | Win2012x64
+          li
+            a(href="#")
+              | Win7SP0x64
+          li
+            a(href="#")
+              | Win7SP0x86
+          li
+            a(href="#")
+              | Win7SP1x64
+          li
+            a(href="#")
+              | Win7SP1x86
+          li
+            a(href="#")
+              | Win81U1x64
+          li
+            a(href="#")
+              | Win81U1x86
+          li
+            a(href="#")
+              | Win8SP0x64 
+          li
+            a(href="#")
+              | Win8SP0x86
+          li
+            a(href="#")
+              | Win8SP1x64
+          li
+            a(href="#")
+              | Win8SP1x86
+          li
+            a(href="#")
+              | WinXPSP1x64
+          li
+            a(href="#")
+              | WinXPSP2x64
+          li
+            a(href="#")
+              | WinXPSP2x86
+          li
+            a(href="#")
+              | WinXPSP3x86
+          li
+            a(href="#")
+              | Other
+
+      div(style="width:5px; height:auto; display:inline-block")
+      input(type="checkbox" id="disk_switch" name="my-checkbox" checked data-on-color='success' data-off-color='success' data-on-text='DISK' data-off-text='MEM' data-label-width=5)
+
+      div(style="height:5px;")
+
+      div(class="form-group" style="width:300px; margin:auto;")
+        input(type="text" class="form-control" id="case_name_disk" placeholder="Enter Case Name")
+      div(style="height:5px;")
+      
+      div(style="text-align:center;")
+        button(class="btn btn-primary" id="submit_button_disk" style="width:300px;" onclick="youClicked()")
+          | Start Analysis &#8658
+      div(style="height:10px;")
+    
+    div(style="height:20px;" id="whitespace2")
+    p(style="margin:auto; text-align:center; width: 200px; height:74px;" id="info_text_disk")
       i
-        | Select a disk image to begin analysis.
-    div(style="height:5px;")
-    
-    div(style="text-align:center;")
-      button(class="btn btn-primary" id="submit-button" style="width:300px; display:none;" onclick="youClicked()")
-        | Start Analysis &#8658
+        | Select a disk or memory image to begin analysis.
+
+    div(style="height:15px;")
     
     div(class="container")
-      div(class="page-header")
-        h3
+      div(class="page-header" style="padding-top:0px; margin-top:0px;")
+        h3(style="padding-top:0px; margin-top:0px; padding-bottom:0px; margin-bottom:0px;")
           span(style="vertical-align:middle;")
             | Database Entries&nbsp&nbsp&nbsp
       div(style="margin:auto;")
@@ -55,20 +184,43 @@ html
           thead
             tr
               th Case
-              th Last Updated
+              th(style="text-align:center;")
+                | Disk
+              th(style="text-align:center;")
+                | Mem
+              th(style="text-align:center;")
+                | Last Updated
           tbody
             each result in cases
               tr
+                td #{result.case}
+                td(style="padding:5px 0 0 0;")
+                  if result.diskimage
+                    div(style="text-align:center; font-size:130%;")
+                      a(href="/cases/#{result.case}")
+                        | &nbsp&#10004&nbsp
+                  else
+                    div(style="text-align:center; padding-top: 4px;")
+                      | &nbsp&#10006&nbsp
+                td(style="padding:5px 0 0 0;") 
+                  if result.memimage
+                    div(style="text-align:center; font-size:130%;")
+                      a(href="#")
+                        | &nbsp&#10004&nbsp
+                  else
+                    div(style="text-align:center; padding-top: 4px;")
+                      | &nbsp&#10006&nbsp
                 td 
-                  a(href="/cases/#{result.case}")
-                    | #{result.case}
-                td #{result.lastupdate}
+                  div(style="text-align:center;")
+                    | #{result.lastupdate}
 
     div(data-remodal-id="modal1")
       h1
         | Confirmed
       p
-        | Disk analysis has been queued in the database
+        span(id="success_name")
+          | Placeholder
+        | analysis has been queued in the database
       br
       button(data-remodal-action="confirm" class="remodal-confirm" onclick="refresh()")
         | Continue
@@ -76,62 +228,110 @@ html
       h1
         | Already Exists
       p
-        | This case name has already been used
+        span(id="failure_name")
+          | Placeholder
+        | entry already exists for this case name
       br
       button(data-remodal-action="confirm" class="remodal-confirm")
         | OK
 
     script.
+      $("[name='my-checkbox']").bootstrapSwitch();
+
       var inst_insert = $('[data-remodal-id=modal1]').remodal();
       var inst_exists = $('[data-remodal-id=modal2]').remodal();
 
       var fullPath = '';
-      $("#submit-button").prop('disabled', true);
+      $("#submit_button_disk").prop('disabled', true);
 
-      $("#choose_button").click(function() {
-          if ($('#dropit').is(':visible'))
-              $("#dropit").slideUp(100);
+      $("#disk_button").click(function() {
+          if ($('#dropit_disk').is(':visible'))
+              $("#dropit_disk").slideUp(100);
           else
-              $("#dropit").slideDown(100);
+              $("#dropit_disk").slideDown(100);
       });
 
-      $("#case_name").on("input", function() {
+      var os_selected = false;
+      $("#case_name_disk").on("input", function() {
           var input = this.value;
-          if (input == "") {
-              $("#submit-button").css("cursor", "default");
-              $("#submit-button").prop('disabled', true);
+          if (!os_selected) 
+              $("#submit_button_disk").html('Please Select OS');
+          else if (input == "") {
+              $("#submit_button_disk").css("cursor", "default");
+              $("#submit_button_disk").prop('disabled', true);
           }
           else if (input.indexOf(' ') >= 0) {
-              $("#submit-button").css("cursor", "default");
-              $("#submit-button").prop('disabled', true);
-              $("#submit-button").html('Please Remove Whitespace');
+              $("#submit_button_disk").css("cursor", "default");
+              $("#submit_button_disk").prop('disabled', true);
+              $("#submit_button_disk").html('Please Remove Whitespace');
           }
           else {
-              $("#submit-button").css("cursor", "pointer");
-              $("#submit-button").prop('disabled', false);
-              $("#submit-button").html('Start Analysis &#8658');
+              $("#submit_button_disk").css("cursor", "pointer");
+              $("#submit_button_disk").prop('disabled', false);
+              $("#submit_button_disk").html('Start Analysis &#8658');
           }
       });
+      
+      $("#os_type").click(function() {
+          if ($('#dropit_os').is(':visible'))
+              $("#dropit_os").slideUp(100);
+          else
+              $("#dropit_os").slideDown(100);
+      })
 
-      $('#fileTreeDemo_1').fileTree({ root: '/mnt/', script: '/directory', expandSpeed: 100, collapseSpeed: 100 }, function(file) {
-          fullPath = file.split('/');
-          fullPath.shift();
-          fullPath.shift();
-          fullPath = '/' + fullPath.join('/');
+      var os_name = "NULL";
+      $("#dropit_os li a").click(function() {
+          $("#dropit_os").slideUp(100);
+          var selText = $(this).text();
+          os_name = selText;
+          os_selected = true;
+          $(this).parents('.dropdown').find('.dropdown-toggle').html(selText+'&nbsp&nbsp<span class="caret"></span>');
+
+          var interim_name = $("#case_name_disk").val();
+          if (interim_name != "" && !(interim_name.indexOf(' ') >= 0)) {
+              $("#submit_button_disk").css("cursor", "pointer");
+              $("#submit_button_disk").prop('disabled', false);
+              $("#submit_button_disk").html('Start Analysis &#8658');
+          }
+          else if (interim_name.indexOf(' ') >= 0)
+              $("#submit_button_disk").html('Please Remove Whitespace');
+          else if (interim_name == "")
+              $("#submit_button_disk").html('Start Analysis &#8658');
+      })
+
+      var switch_val = "disk";
+      $("#disk_switch").on('switchChange.bootstrapSwitch', function (event, state) {
+          if (switch_val == "disk")
+              switch_val = "mem";
+          else
+              switch_val = "disk";
+      })
+
+      $('#fileTree_disk').fileTree({ root: '/mnt/', script: '/get-directory', expandSpeed: 100, collapseSpeed: 100 }, function(file) {
+          fullPath = file
           var splitpath = file.split('/');
           var fileName = splitpath[splitpath.length-1];
 
-          $("#info_text").css("display", "none");
-          $("#case_name").css("visibility", "visible");
-          $("#submit-button").css("display", "inline");
-          $("#submit-button").css("cursor", "default");
-          $("#dropit").slideUp(100);
+          $("#info_text_disk").css("display", "none");
+          $("#whitespace1").css("display", "none");
+          $("#whitespace2").css("display", "none");
+          $("#submit_button_disk").css("cursor", "default");
+          $("#disk_options").css("display", "block");
+          $("#dropit_disk").slideUp(100);
 
-          $("#choose_button").html('('+fileName+') Selected  <span class="caret"></span>');
+          $("#disk_button").html(fileName+'&nbsp&nbsp<span class="caret"></span>');
       });
 
       $(document).ready(function() {
-          var table = $('#example').DataTable();
+          var table = $('#example').DataTable( {
+              "order": [[ 3, "desc" ]],
+              "columns": [
+                null,
+                { "width": "50px", "orderable": false },
+                { "width": "50px", "orderable": false },
+                { "width": "30%" }
+                ]
+          });
       });
 
       function refresh() {
@@ -139,16 +339,27 @@ html
       };
 
       function youClicked() {
-          var case1 = $('#case_name').val();
+          var case1 = $('#case_name_disk').val();
           var diskimage = fullPath;
+
           $.post( 
              "/start-scan",
-             { case1: case1, diskimage: diskimage },
+             { case1: case1, diskimage: diskimage, os_name: os_name, type: switch_val},
              function(data) {
-                 if (data == "Success")
+                 if (data == "Success") {
+                     if (switch_val == "disk")
+                         $("#success_name").text("Disk ");
+                     else
+                         $("#success_name").text("Memory ");
                      inst_insert.open()
-                 else if (data == "Exists")
+                 }
+                 else if (data == "Exists") {
+                     if (switch_val == "disk")
+                         $("#failure_name").text("A disk ");
+                     else
+                         $("#failure_name").text("A memory ");
                      inst_exists.open()
+                 }
                  else
                      alert("ERROR: " + data["errmsg"])
              }

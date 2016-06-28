@@ -42,7 +42,7 @@ app.get('/cases', function (req, res) {
 
 
 // gets a list of all disk images in /mnt directory for file viewer
-app.post('/directory', function (req, res) {
+app.post('/get-directory', function (req, res) {
     var dir = req.body.dir;
     var ext = ['.001', '.dd'];
 
@@ -102,32 +102,51 @@ app.get('/forensic-cases', function (req, res) {
 
 // view to start a scan for a disk image
 app.post('/start-scan', function(req, res) {
-    var name = req.body.case1.replace(/\s/g,'');
+    var case_name = req.body.case1.replace(/\s/g,'');
     var diskimage = req.body.diskimage;
+    var os_name = req.body.os_name;
+    var image_type = req.body.type;
+    console.log(case_name);
+    console.log(diskimage);
+    console.log(os_name);
+    console.log(image_type);
     
     var url = "mongodb://jdonas:NCIR4525@192.168.0.113/paladion-cases?authSource=admin";
     MongoClient.connect(url, function(err, db) {
         var collection = db.collection('cases');
         
         // does a check to see if casename already exists
-        collection.count({ "case": name}, function (err, num) {
-            if (num >= 1)
-                res.send("Exists");
-            else {
-                collection.insertOne( {
-                    "case": name,
-                    "diskimage": diskimage
-                }, function (err, result) {
-                    if (err) {
-                        res.send(err);
-                    }
-                    else {
-                        db.close();
-                        res.send("Success");
-                    }
-                });
-            }
-        });
+
+        function startScan(type, search, query) {
+            collection.count(search, function (err, num) {
+                if (num >= 1) {
+                    res.send("Exists");
+                    db.close();
+                }
+                else {/*
+                    collection.insertOne(query, function (err, result) {
+                        if (err) {
+                            res.send(err);
+                            db.close();
+                        }
+                        else {
+                            res.send("Success");
+                            db.close();
+                        }
+                    });*/
+                    res.send("Success");
+                    db.close();
+                }
+            });
+        }
+
+        if (image_type == "disk")
+            startScan("diskimage", { "case": case_name, "diskimage": { $exists: true }},
+                      "TODO");
+        else
+            startScan("memimage", { "case": case_name, "memimage": { $exists: true }}, 
+                      "TODO");
+
     });
 });
 
