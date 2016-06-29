@@ -1,0 +1,21 @@
+doctype
+html
+  head
+    link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
+  body
+    div(class="container")
+      h3
+        span(style="display:inline-block; width:80%;")
+          | #{case_name}&nbsp&nbsp&nbsp
+        span(style="font-size: 60%; text-align:right; display:inline-block; width:20%")
+          | Memory Progress
+      div(class="progress")
+        each bar in prog_stack
+          div(class="progress-bar #{bar.progress}" role="progressbar" style="width:#{bar.percent}%")
+            | #{bar.status}
+      hr
+
+      div(style="text-align:center")
+        h5
+          | OS Type:&nbsp
+          b #{os_type}

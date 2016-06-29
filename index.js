@@ -100,31 +100,27 @@ app.get('/forensic-cases', function (req, res) {
 ////////////////////////////////////////////
 
 
-// view to start a scan for a disk image
+// view to start a scan for a disk/mem image
 app.post('/start-scan', function(req, res) {
     var case_name = req.body.case1.replace(/\s/g,'');
-    var diskimage = req.body.diskimage;
+    var full_path = req.body.full_path;
     var os_name = req.body.os_name;
     var image_type = req.body.type;
-    console.log(case_name);
-    console.log(diskimage);
-    console.log(os_name);
-    console.log(image_type);
     
     var url = "mongodb://jdonas:NCIR4525@192.168.0.113/paladion-cases?authSource=admin";
     MongoClient.connect(url, function(err, db) {
         var collection = db.collection('cases');
         
-        // does a check to see if casename already exists
-
         function startScan(type, search, query) {
             collection.count(search, function (err, num) {
+                // checks if image exists for case name
                 if (num >= 1) {
                     res.send("Exists");
                     db.close();
                 }
-                else {/*
-                    collection.insertOne(query, function (err, result) {
+                // updates/creates the case
+                else {
+                    collection.update({"case": case_name}, query, {upsert: true}, function (err, count, stat) {
                         if (err) {
                             res.send(err);
                             db.close();
@@ -133,19 +129,17 @@ app.post('/start-scan', function(req, res) {
                             res.send("Success");
                             db.close();
                         }
-                    });*/
-                    res.send("Success");
-                    db.close();
+                    });
                 }
             });
         }
 
         if (image_type == "disk")
-            startScan("diskimage", { "case": case_name, "diskimage": { $exists: true }},
-                      "TODO");
+            startScan("diskimage", {"case": case_name, "diskimage": {$exists: true}},
+                      {"$set": {"diskimage": full_path}});
         else
-            startScan("memimage", { "case": case_name, "memimage": { $exists: true }}, 
-                      "TODO");
+            startScan("memimage", {"case": case_name, "memimage": {$exists: true}}, 
+                      {"$set": {"memimage": full_path, "profile": os_name, "memanalyzing": false}});
 
     });
 });
@@ -204,8 +198,8 @@ app.post('/scan-control', function(req, res) {
 ////////////////////////////////////////////
 
 
-// retrieves and displays case info from mongodb
-app.get('/cases/:case', function (req, res) {
+// retrieves and displays disk info from mongodb
+app.get('/disk-cases/:case', function (req, res) {
     var search = 
       [{"virustotalpercentage": null}, {"virustotalpercentage": 0}, 
        {"virustotalpercentage": {"$gt": 5}}, {"virustotalpercentage": {"$gt": 10}}, 
@@ -269,28 +263,6 @@ app.get('/cases/:case', function (req, res) {
                 finInfo();
             });
         });
-
-/*        var dates = []
-        var date = new Date();
-        var day = date.getDate();
-        var month = date.getMonth();
-        var start_day = day;
-
-        // gets chrome history data
-        var collection3 = db.collection('urlhistory');
-        collection3.find({download:{$exists: false}}).toArray(function(err, docs) {
-            for (var i = 0; i < docs.length; ++i) {
-                history.push({group: 1, content: '&zwnj;', start: docs[i]["visittime"]});
-            }
-            finInfo();
-        });
-
-        collection3.find({download:{$exists: true}}).toArray(function(err, docs) {
-            for (var i = 0; i < docs.length; ++i) {
-                history.push({group: 2, content: '&zwnj;', start: docs[i]["visittime"]});
-            }
-            finInfo();
-        }); */
 
         // function to call when all mongo calls are complete
         function doClose() {
@@ -392,7 +364,7 @@ app.get('/cases/:case', function (req, res) {
             status = percent.toString() + stage;
         }
 
-        res.render("/home/jdonas/web-interface/components/scan-interface/views/results", 
+        res.render("/home/jdonas/web-interface/components/scan-interface/views/disk-results", 
           { percent: percent, progress: progress, tot_files: results[13].result, case_name: case_name, status: status, clam_detections: clam_detections, vtotal_detections: vtotal_detections, acm_times: acm_times,
             vtotal_null: results[0].result, vtotal_0: results[1].result, vtotal_gt5: results[2].result, vtotal_gt10: results[3].result,
             nsrl_null: results[4].result, nsrl_true: results[5].result, nsrl_false: results[6].result,
@@ -404,6 +376,95 @@ app.get('/cases/:case', function (req, res) {
 
 });
 
+
+////////////////////////////////////////////
+
+
+app.get('/mem-cases/:case/:os', function (req, res) {
+    var case_name = req.params.case;
+    var os_type = req.params.os;
+
+    var search =
+      [{}, {"pslist": false}, {"exittime": {$ne: ""}}];
+    var stages =
+      [{"stagename": "pslist"}, {"stagename": "psxview"}, {"stagename": "symlinkscan"},
+       {"stagename": "handles"}, {"stagename": "privs"}, {"stagename": "procdump"},
+       {"stagename": "vadinfo"}, {"stagename": "memdump"}];
+    var results = [];
+    var stage_results = [];
+    var finished = _.after(1, doRender);
+
+    var url = "mongodb://jdonas:NCIR4525@192.168.0.113/" + case_name +"?authSource=admin";
+    MongoClient.connect(url, function(err, db) {
+        var finInfo = _.after(search.length+stages.length, doClose);
+        var collection = db.collection('processes');
+
+        // gets count info
+        search.forEach(function (value, i) {
+            collection.count(value, function (err, num) {
+                results.push({index: i, result: num});
+                finInfo();
+            });
+        });
+
+        // gets completed stages
+        var collection2 = db.collection('stages');
+        stages.forEach(function (value, i) {
+            collection2.count(value, function (err, num) {
+                stage_results[value["stagename"]] = num;
+                finInfo();
+            });
+        });
+
+        // function to call when all mongo calls are complete
+        function doClose() {
+            db.close();
+            finished();
+        }
+    })
+
+    function doRender() {
+
+        // used to sort the results list
+        function compare(a, b) {
+          if (a.index < b.index)
+            return -1;
+          else (a.index > b.index)
+            return 1;
+        }
+        
+        results.sort(compare);
+
+        var prog_stack = [];
+        var stage_names = ["pslist", "psxview", "symlinkscan", "handles","privs", "procdump", "vadinfo", "memdump"];
+
+        // logic for displaying progress bar
+        if (stage_results["memdump"])
+            prog_stack.push({"progress": "progress-bar-success", "percent": "100", "status": "COMPLETE"});
+        else {
+            function capitalize(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+
+            var count = 0, cur_stage;
+            for(var i = 0; i < stage_names.length; ++i) {
+                if (!stage_results[stage_names[i]]) {
+                    cur_stage = stage_names[i];
+                    break; }
+                else
+                    count += 12.5;
+            }
+
+            if (count > 0);
+                prog_stack.push({"progress": "progress-bar-success", "percent": count, "status": count + "% COMPLETE"})
+            prog_stack.push({"progress": "progress-bar-striped active", "percent": "12.5", "status": capitalize(cur_stage)});
+        }
+        
+        res.render("/home/jdonas/web-interface/components/scan-interface/views/mem-results", {prog_stack: prog_stack, case_name: case_name, os_type: os_type});
+    
+    }
+
+})
 
 ////////////////////////////////////////////
 

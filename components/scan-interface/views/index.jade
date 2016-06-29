@@ -197,7 +197,7 @@ html
                 td(style="padding:5px 0 0 0;")
                   if result.diskimage
                     div(style="text-align:center; font-size:130%;")
-                      a(href="/cases/#{result.case}")
+                      a(href="/disk-cases/#{result.case}")
                         | &nbsp&#10004&nbsp
                   else
                     div(style="text-align:center; padding-top: 4px;")
@@ -205,7 +205,7 @@ html
                 td(style="padding:5px 0 0 0;") 
                   if result.memimage
                     div(style="text-align:center; font-size:130%;")
-                      a(href="#")
+                      a(href="/mem-cases/#{result.case}/#{result.profile}")
                         | &nbsp&#10004&nbsp
                   else
                     div(style="text-align:center; padding-top: 4px;")
@@ -340,11 +340,10 @@ html
 
       function youClicked() {
           var case1 = $('#case_name_disk').val();
-          var diskimage = fullPath;
 
           $.post( 
              "/start-scan",
-             { case1: case1, diskimage: diskimage, os_name: os_name, type: switch_val},
+             { case1: case1, full_path: fullPath, os_name: os_name, type: switch_val},
              function(data) {
                  if (data == "Success") {
                      if (switch_val == "disk")

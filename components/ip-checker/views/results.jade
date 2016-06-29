@@ -27,20 +27,30 @@ html
         | Info for:&nbsp;
       span(class="red")
         | #{ip}
+
     br
-    div(id="googleMap" style="border-radius: 15px; width:500px; height:200px; margin: auto;")
+    div(style="width:700px; margin:auto;")
+      div(style="width:500px; float:left")
+        div(id="googleMap" style="border-radius: 15px; width:500px; height:200px; margin: auto;")
+        br
+        div(style="width: 470px; margin: 0 auto; font-size: 130%;")
+          hr
+          | !{vir_insert}
+          hr
+        div(style="font-size: 130%; text-align: center;")
+          | !{reg_insert}
+        div(style="width: 470px; margin: 0 auto; font-size: 130%;")
+          hr
+          p(style="font-size: 80%;")
+            b Elasticsearch Query Time:&nbsp;
+            | #{time}ms
+
+      div
+        p
+          | Test
+        
+    div(style="clear:both;")
     br
-    div(style="width: 470px; margin: 0 auto; font-size: 130%;")
-      hr
-      | !{vir_insert}
-      hr
-    div(style="font-size: 130%; text-align: center;")
-      | !{reg_insert}
-    div(style="width: 470px; margin: 0 auto; font-size: 130%;")
-      hr
-      p(style="font-size: 80%;")
-        b Elasticsearch Query Time:&nbsp;
-        | #{time}ms
     div(data-role="collapsible")
       h1 VirusTotal Details
       #vir_output
