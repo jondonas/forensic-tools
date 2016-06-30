@@ -1,0 +1,88 @@
+doctype
+html
+  head
+    link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
+    link(rel="stylesheet", href="/components/ip-checker/static/spinner.css")
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
+  body
+    div(style="margin:auto; text-align:center;")
+      br
+      h4
+        | Blacklist Scan
+      hr
+
+      div(style="text-align:center; display:inline-block;" class="dropdown")
+        button(class="btn btn-default dropdown-toggle" id="time_button" type="button" data-toggle="dropdown" data-role="none")
+          | 5 Seconds&nbsp&nbsp
+          span(class="caret")
+        ul(class="dropdown-menu" id="dropit_time" style="left:50%; right:auto; transform:translate(-50%, 0); max-height:500px; width:100px; overflow:auto; border-left: 0px solid #F1F1F1; border-right: 0px solid #F1F1F1; border-top: 0px solid white; border-bottom: 3px solid #F1F1F1; background-color: #F1F1F1;")
+          li(style="text-align:center")
+            a(href="#" data-time="1")
+              | 1 Second
+          li(style="text-align:center")
+            a(href="#" data-time="5")
+              | 5 Seconds
+          li(style="text-align:center")
+            a(href="#" data-time="10")
+              | 10 Seconds
+          li(style="text-align:center")
+            a(href="#" data-time="30")
+              | 30 Seconds
+          li(style="text-align:center")
+            a(href="#" data-time="60")
+              | 60 Seconds
+
+      div(style="width:5px; height:auto; display:inline-block")
+      button(data-role="none" id="loadBL" style="width:70px; height:33px; padding: 0; border: 0" type="button" class="btn btn-primary" onclick="scanMe()")
+        p(style="padding:3px 5px; margin:3px 5px;")
+          | Scan
+    
+      div(style="height:20px;")
+      unless results
+        br
+        br
+        p
+          | Select timeout above.
+          br
+          br
+          | Longer scans may get more responses from slower-responding blacklists.
+          br
+          br
+          | This scanner queries over 175 internet spam blacklists.
+      else if results[0] == "none"
+        br
+        br
+        p
+          b This IP is not on
+          br
+          b any blacklists!
+      else
+        br
+        p
+          b Flagged by:
+        div(style="display: inline-block; text-align: left; padding: 10px 0px;")
+          each result, ind in results
+            p
+              | [*] #{results[ind]}
+        
+    script.
+      $("#time_button").click(function() {
+          if ($('#dropit_time').is(':visible'))
+              $("#dropit_time").slideUp(100);
+          else
+              $("#dropit_time").slideDown(100);
+      })
+
+      var time_val = 5;
+      $("#dropit_time li a").click(function() {
+          $("#dropit_time").slideUp(100);
+          var selText = $(this).text();
+          time_val = $(this).attr('data-time');
+
+          $(this).parents('.dropdown').find('.dropdown-toggle').html(selText+'&nbsp&nbsp<span class="caret"></span>');
+      })
+
+      function scanMe() {
+          $("#loadBL").html('<div class="spinner" style="padding:5px; margin:auto;"</div>');
+          window.location = "/blacklist/#{ip}/"+time_val;
+      }

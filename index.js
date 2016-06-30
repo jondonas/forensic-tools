@@ -8,6 +8,7 @@ var exec = require('child_process').exec;
 var MongoClient = require('mongodb').MongoClient;
 var favicon = require('serve-favicon');
 var path = require('path'), fs=require('fs');
+var lookup = require('dnsbl-lookup');
 //var dns = require('dns');
 
 var app = express();
@@ -674,16 +675,16 @@ console.log(iptohost);
             resolutions = "1000+";
         }
 
-        vir_html = "<img src='components/ip-checker/static/comm.png' height='30'/>" +
+        vir_html = "<img src='/components/ip-checker/static/comm.png' height='30'/>" +
                "<p style='text-indent: 30px; margin-bottom: 10px;'><b>Detected Communicating Samples:</b> " + "<span style='color: " + colors[0] + "'>" + d_comm + "</span>" + "</p>" +
              "<p style='text-indent: 100px; font-size: 80%; margin-top: 0px;'><b>AV Detection Rate:</b> " + "<span style='color: " + colors[1] + "'>" + comm_score + "</span>" + "</p>" +
-               "<img src='components/ip-checker/static/down.png' height='30'/>" +
+               "<img src='/components/ip-checker/static/down.png' height='30'/>" +
                "<p style='text-indent: 30px; margin-bottom: 10px;'><b>Detected Downloaded Samples:</b> " + "<span style='color: " + colors[2] + "'>" + d_down + "</span>" + "</p>" +
                "<p style='text-indent: 100px; font-size: 80%; margin-top: 0px;'><b>AV Detection Rate:</b> " + "<span style='color: " + colors[3] + "'>" + down_score + "</span>" + "</p>" +
-               "<img src='components/ip-checker/static/urls.png' height='30'/>" +
+               "<img src='/components/ip-checker/static/urls.png' height='30'/>" +
                "<p style='text-indent: 30px; margin-bottom: 10px;'><b>Detected URLs:</b> " + "<span style='color: " + colors[4] + "'>" + d_urls + "</span>" + "</p>" +
                "<p style='text-indent: 100px; font-size: 80%; margin-top: 0px;'><b>AV Detection Rate:</b> " + "<span style='color: " + colors[5] + "'>" + urls_score + "</span>" + "</p>" +
-               "<img src='components/ip-checker/static/res.png'  height='30'/>" +
+               "<img src='/components/ip-checker/static/res.png'  height='30'/>" +
              "<p style='text-indent: 30px;'><b>DNS Resolutions:</b> " + "<span style='color: " + colors[6] + "'>" + resolutions + "</span>" + "</p>";
       }
 
@@ -715,6 +716,45 @@ console.log(iptohost);
     }
 
   }
+});
+
+
+////////////////////////////////////////////
+
+
+app.get('/blacklist/:ip/:timeout', function (req, res) {
+    var ip = req.params.ip;
+    var timeout = req.params.timeout;
+    var results;
+
+    if (timeout != "none") {
+        var results = [];
+        var dnsbl = new lookup.dnsbl(ip);
+
+        dnsbl.on('error',function(err,bl){
+        });
+        dnsbl.on('data',function(response,bl){
+            if (response.status == "listed") {
+                results.push(bl.zone);
+            }
+        });
+        dnsbl.on('done', function(){
+        });
+
+        setTimeout(function() { 
+            if (!results || results.length == 0)
+                results = ["none"];
+            render();
+        }, +timeout*1000 );
+    }
+    else
+        render();
+
+    function render() {
+        res.render("/home/jdonas/web-interface/components/ip-checker/views/blacklist",
+                    {results: results, ip: ip});
+    }
+
 });
 
 

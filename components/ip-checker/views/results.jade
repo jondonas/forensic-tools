@@ -1,14 +1,13 @@
 doctype
 html
   head
-    link(rel="stylesheet", href="components/ip-checker/static/json.human.css")
+    link(rel="stylesheet", href="/components/ip-checker/static/json.human.css")
+    link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
     link(rel="stylesheet", href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css")
-    link(rel='stylesheet', type='text/css', href='components/ip-checker/static/results.css')
-    script(src="components/ip-checker/static/json.human.js")
+    link(rel='stylesheet', type='text/css', href='/components/ip-checker/static/results.css')
+    script(src="/components/ip-checker/static/json.human.js")
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js")
 
-    //style
-      //include components/ip-checker/static/results.css
-    script(src="http://code.jquery.com/jquery-1.11.3.min.js")
     script(src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js")
     script(src="http://maps.googleapis.com/maps/api/js")
     script.
@@ -29,34 +28,41 @@ html
         | #{ip}
 
     br
-    div(style="width:700px; margin:auto;")
-      div(style="width:500px; float:left")
-        div(id="googleMap" style="border-radius: 15px; width:500px; height:200px; margin: auto;")
-        br
+    div(id="googleMap" style="border-radius: 15px; width:500px; height:200px; margin: auto;")
+    br
+    div(style="clear:both")
+    br
+    br
+
+    div(style="width:800px; margin:auto;")
+      div(style="display:inline-block; float: left; width: 500px;")
         div(style="width: 470px; margin: 0 auto; font-size: 130%;")
           hr
           | !{vir_insert}
           hr
         div(style="font-size: 130%; text-align: center;")
           | !{reg_insert}
-        div(style="width: 470px; margin: 0 auto; font-size: 130%;")
           hr
-          p(style="font-size: 80%;")
-            b Elasticsearch Query Time:&nbsp;
-            | #{time}ms
+      div(style="border: 2px solid #A8A8A8; border-radius:10px; height:400px; width:275px; display:inline-block; float:right;")
+        div(style="margin:auto; width: 255px; height: 380px;")
+          iframe(width="100%" height="100%" frameborder="0" src="/blacklist/#{ip}/none")
 
-      div
-        p
-          | Test
+    div(style="clear:both")
         
-    div(style="clear:both;")
-    br
+    div(style="width: 470px; margin: 0 auto; font-size: 130%;")
+      br
+      p(style="font-size: 80%; text-align:center;")
+        b Elasticsearch Query Time:&nbsp;
+        | #{time}ms
+      br
+      br
     div(data-role="collapsible")
       h1 VirusTotal Details
       #vir_output
     div(data-role="collapsible")
       h1 Registrar Details
       #reg_output
+
     script.
       function draw(json, output) {
         var input = json;
