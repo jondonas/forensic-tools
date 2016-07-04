@@ -388,16 +388,19 @@ app.get('/mem-cases/:case/:os', function (req, res) {
     var search =
       [{}, {"pslist": false}, {"exittime": {$ne: ""}}];
     var stages =
-      [{"stagename": "pslist"}, {"stagename": "psxview"}, {"stagename": "symlinkscan"},
-       {"stagename": "handles"}, {"stagename": "privs"}, {"stagename": "procdump"},
-       {"stagename": "vadinfo"}, {"stagename": "memdump"}];
+      [{"stagename": "psxview"}, {"stagename": "pslist"}, {"stagename": "symlinkscan"},
+       {"stagename": "handles"}, {"stagename": "privs"}, {"stagename": "vadinfo"}, 
+       {"stagename": "procdump"}, {"stagename": "envars"}, {"stagename": "netscan"}, 
+       {"stagename": "ldrmodules"}];
     var results = [];
     var stage_results = [];
+    var anomalies = [];
+    var dlls = 0;
     var finished = _.after(1, doRender);
 
     var url = "mongodb://jdonas:NCIR4525@192.168.0.113/" + case_name +"?authSource=admin";
     MongoClient.connect(url, function(err, db) {
-        var finInfo = _.after(search.length+stages.length, doClose);
+        var finInfo = _.after(search.length+stages.length+2, doClose);
         var collection = db.collection('processes');
 
         // gets count info
@@ -415,6 +418,31 @@ app.get('/mem-cases/:case/:os', function (req, res) {
                 stage_results[value["stagename"]] = num;
                 finInfo();
             });
+        });
+
+        // gets anomalies
+        var collection3 = db.collection('anomalies');
+        collection3.find({}).toArray(function(err, docs) {
+            for (var i = 0; i < docs.length; ++i) {
+                if (!(docs[i]["anomaly"].indexOf("but it is hidden") > -1))
+                    anomalies.push(docs[i]);
+            }
+            finInfo();
+        });
+
+        // counts hidden dlls
+        var collection4 = db.collection('dlls');
+        collection4.find({ "$or": [{"inmem": false}, {"inload": false},{"ininit": false}] }).toArray(function(err, docs) {
+            for (var i = 0; i < docs.length; ++i) {
+                var splitpath = docs[i]["mappedpath"].split('\\');
+                var filename = splitpath[splitpath.length-1];
+                var procname = docs[i]["process"];
+
+                if (!(filename.indexOf(procname) > -1))
+                    ++dlls;
+            }
+            
+            finInfo();
         });
 
         // function to call when all mongo calls are complete
@@ -437,10 +465,10 @@ app.get('/mem-cases/:case/:os', function (req, res) {
         results.sort(compare);
 
         var prog_stack = [];
-        var stage_names = ["pslist", "psxview", "symlinkscan", "handles","privs", "procdump", "vadinfo", "memdump"];
+        var stage_names = ["psxview", "pslist", "symlinkscan", "handles", "privs", "vadinfo", "procdump", "envars", "netscan", "ldrmodules"];
 
         // logic for displaying progress bar
-        if (stage_results["memdump"])
+        if (stage_results["ldrmodules"])
             prog_stack.push({"progress": "progress-bar-success", "percent": "100", "status": "COMPLETE"});
         else {
             function capitalize(string) {
@@ -461,7 +489,7 @@ app.get('/mem-cases/:case/:os', function (req, res) {
             prog_stack.push({"progress": "progress-bar-striped active", "percent": "12.5", "status": capitalize(cur_stage)});
         }
         
-        res.render("/home/jdonas/web-interface/components/scan-interface/views/mem-results", {prog_stack: prog_stack, case_name: case_name, os_type: os_type});
+        res.render("/home/jdonas/web-interface/components/scan-interface/views/mem-results", {prog_stack: prog_stack, case_name: case_name, os_type: os_type, anomalies: anomalies, hidden: dlls });
     
     }
 
