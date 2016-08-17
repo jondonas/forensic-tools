@@ -1,15 +1,18 @@
-Access Key ID: [Access Key ID]
-Secret Access Key: [Secret Access Key]
+##Installation
 
-Make sure to configure proper security group access
+Make sure to configure proper security group access for AWS instances. Eg, allow all inbound and outbound.
 
+###Install salt on master
+```
 sudo add-apt-repository ppa:saltstack/salt
 sudo apt-get update
 sudo apt-get install python-software-properties salt-master salt-cloud
-[on local machine] scp -i ~/master.pem ~/master.pem ubuntu@ec2-54-172-110-211.compute-1.amazonaws.com:~/
+scp -i ~/master.pem ~/master.pem ubuntu@[master-ip]:~/ (on local machine)
 mv master.pem /etc/salt/
+```
 
-sudo vim /etc/salt/cloud.providers.d/ec2-us-east-1.conf
+###Configure providers (aws in this case)
+Create and configure: /etc/salt/cloud.providers.d/ec2-us-east-1.conf
 ```
 ec2-us-east-1-public:
   minion:
@@ -28,7 +31,8 @@ ec2-us-east-1-public:
   rename_on_destroy: True
 ```
 
-sudo vim /etc/salt/cloud.profiles.d/ec2-us-east-1.conf
+###Configure profile
+Create and configure: /etc/salt/cloud.profiles.d/ec2-us-east-1.conf
 ```
 ec2_east_nano_prod:
   provider: ec2-us-east-1-public
@@ -38,29 +42,38 @@ ec2_east_nano_prod:
   tag: {'Environment': 'production'}
   sync_after_install: grains
 ```
-
+###Spin up a single instance for a test
+```
 sudo salt-cloud -p ec2_east_nano_prod saltcloud_test
+```
 
-cloud map:
-sudo vim /etc/salt/cloud.maps.d/cmap.ec2
+###Create a cloud map
+Create and configure: /etc/salt/cloud.maps.d/cmap.ec2
 ```
 ec2_east_nano_prod:
   - salt_test1
   - salt_test2
   - salt_test3
 ```
-
+###Spin up instances with a cloud map
+```
 sudo salt-cloud -m /etc/salt/cloud.maps.d/cmap.ec2 -P
+```
 
+###Shutdown/restart/etc minions
+```
+sudo salt-cloud -m /etc/salt/cloud.maps.d/cmap.ec2 -a [reboot/stop/destroy]
+```
 
-
-On dnmap server:
+###Setup dnmap on master
+```
 sudo apt-get install python-openssl python-twisted
 sudo wget http://downloads.sourceforge.net/project/dnmap/dnmap_v0.6.tgz -P /opt
 sudo tar -xvzf dnmap_v0.6.tgz
+```
 
-sudo mkdir /srv/salt
-sudo vim /srv/salt/dnmap.sls
+###Create a salt state to install dnmap on minions
+Create and configure: /srv/salt/dnmap.sls
 ```
 nmap:
   pkg:
@@ -78,27 +91,30 @@ sudo tar -xvzf /opt/dnmap_v0.6.tgz -C /opt:
 sudo rm /opt/dnmap_v0.6.tgz:
   cmd.run
 ```
-sudo vim vim /srv/salt/top.sls
+Create and configure: /srv/salt/top.sls
 ```
 base:
   '*':
     - dnmap
 ```
 
+###Apply salt states to minions
+```
 sudo salt '*' state.highstate
-
-
-sudo vim /opt/dnmap_v0.6/commands.txt
-```
-nmap -sV 54.152.175.250
 ```
 
-in /opt/dnmap_v0.6/
+###Create a commands file for dnmap. Alternatively, use command-maker.py file to create file
+Create and configure: /opt/dnmap_v0.6/commands.txt
+```
+nmap -sV [ip]
+```
+
+###Run dnmap on master
+```
 sudo ./dnmap_server.py -f commands.txt
+```
 
-
+###Connect minions (run on master)
+```
 sudo salt '*' cmd.run '/opt/dnmap_v0.6/dnmap_client.py -s 54.172.110.211 -a minion-$(ifconfig eth0 | grep "inet addr" | cut -d: -f2 | cut -d" " -f1)'
-
-
-
-sudo salt-cloud -m /etc/salt/cloud.maps.d/cmap.ec2 -a reboot
+```

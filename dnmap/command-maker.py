@@ -27,7 +27,7 @@ for ip in ip_list:
         # following indexes are used to exclude network and bcast addresses of subnet
         rand = random.randint(1,subnet.size-2)
         decoy = str(subnet[rand])
-        commands.append("nmap -p %s %s -D %s\n" % (port, ip, decoy))
+        commands.append("nmap -sV -p %s %s -D %s\n" % (port, ip, decoy))
 
 # randomize command order
 random.shuffle(commands)
